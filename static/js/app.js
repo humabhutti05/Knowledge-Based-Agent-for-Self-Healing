@@ -8,8 +8,43 @@ const ICONS = {
 let state = {
   gender: null,
   age: null,
-  text: ""
+  text: "",
+  model: null // To store the fetched model.json
 };
+
+// ── Prior Rules (Duplicated from app.py for static use) ──
+const PRIOR_RULES = {
+  "male": {
+    "teen":    {"Anxiety":18,"Depression":20,"Stress":22,"Bipolar":12,"Suicidal":14,"Normal":10,"Personality disorder":4},
+    "young":   {"Anxiety":16,"Depression":18,"Stress":28,"Bipolar":10,"Suicidal":12,"Normal":12,"Personality disorder":4},
+    "adult":   {"Anxiety":14,"Depression":22,"Stress":30,"Bipolar":12,"Suicidal":10,"Normal":8,"Personality disorder":4},
+    "mid":     {"Anxiety":16,"Depression":26,"Stress":24,"Bipolar":10,"Suicidal":12,"Normal":8,"Personality disorder":4},
+    "elderly": {"Anxiety":18,"Depression":32,"Stress":18,"Bipolar":8,"Suicidal":14,"Normal":6,"Personality disorder":4},
+  },
+  "female": {
+    "teen":    {"Anxiety":30,"Depression":25,"Stress":16,"Bipolar":8,"Suicidal":10,"Normal":7,"Personality disorder":4},
+    "young":   {"Anxiety":32,"Depression":28,"Stress":16,"Bipolar":8,"Suicidal":8,"Normal":5,"Personality disorder":3},
+    "adult":   {"Anxiety":28,"Depression":30,"Stress":18,"Bipolar":9,"Suicidal":7,"Normal":5,"Personality disorder":3},
+    "mid":     {"Anxiety":26,"Depression":32,"Stress":18,"Bipolar":8,"Suicidal":8,"Normal":5,"Personality disorder":3},
+    "elderly": {"Anxiety":22,"Depression":36,"Stress":16,"Bipolar":8,"Suicidal":10,"Normal":5,"Personality disorder":3},
+  }
+};
+
+const AGE_LABELS = {
+  "teen": "Teen (13–19)", "young": "Young Adult (20–35)",
+  "adult": "Adult (36–55)", "mid": "Middle Age (56–65)", "elderly": "Elderly (65+)"
+};
+
+// ── Initialization ──
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch("data/model.json");
+    state.model = await res.json();
+    console.log("Neural model loaded successfully");
+  } catch (err) {
+    console.error("Failed to load model:", err);
+  }
+});
 
 // ── Selectors ──
 function selectGender(g) {
@@ -75,20 +110,84 @@ async function analyze() {
       <p style="margin-top: 1rem; color: var(--text-muted);">Integrating prior probabilities with statement evidence...</p>
     </div>`;
 
-  try {
-    const res = await fetch("/api/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, gender: state.gender, age: state.age })
-    });
-    const data = await res.json();
-    renderResult(data);
-  } catch (err) {
-    document.getElementById("resultArea").innerHTML = `<div class="card glass">Error: ${err.message}</div>`;
-    btn.disabled = false;
-    btn.textContent = "Run Neural Inference";
-  }
+  // Local Neural Analysis (Ported from Python)
+  setTimeout(() => {
+    const result = runNeuralInference(text);
+    renderResult(result);
+  }, 800); // Simulate processing time for UX
 }
+
+function runNeuralInference(text) {
+  const priors = PRIOR_RULES[state.gender][state.age];
+  const g_label = state.gender === "male" ? "Male" : "Female";
+  const a_label = AGE_LABELS[state.age];
+
+  let posteriors = {};
+  let top_condition = "Normal";
+
+  if (state.model) {
+    const tokens = text.toLowerCase().match(/\w+/g) || [];
+    const classes = state.model.classes;
+    const vocab_size = state.model.vocab_size;
+    const profile_weights = Object.fromEntries(Object.entries(priors).map(([k, v]) => [k, v / 100]));
+    
+    let class_scores = {};
+    for (let c of classes) {
+      const data_prior = state.model.class_priors[c] || (1 / classes.length);
+      const profile_prior = profile_weights[c] || 0.1;
+      
+      let score = Math.log(data_prior * profile_prior);
+      for (let token of tokens) {
+        const count = (state.model.word_probs[token] && state.model.word_probs[token][c]) || 0;
+        const prob = (count + 1) / (state.model.class_totals[c] + vocab_size);
+        score += Math.log(prob);
+      }
+      class_scores[c] = score;
+    }
+
+    const max_score = Math.max(...Object.values(class_scores));
+    const exp_scores = Object.fromEntries(Object.entries(class_scores).map(([k, v]) => [k, Math.exp(v - max_score)]));
+    const total_exp = Object.values(exp_scores).reduce((a, b) => a + b, 0);
+    
+    posteriors = Object.fromEntries(Object.entries(exp_scores).map(([k, v]) => [k, (v / total_exp) * 100]));
+    top_condition = Object.keys(posteriors).reduce((a, b) => posteriors[a] > posteriors[b] ? a : b);
+  } else {
+    // Basic fallback if model didn't load
+    posteriors = {...priors};
+    top_condition = "Normal";
+  }
+
+  const is_crisis = text.toLowerCase().includes("kill") || text.toLowerCase().includes("suicide") || posteriors["Suicidal"] > 40;
+  const confidence = Math.max(...Object.values(posteriors)) > 60 ? "High" : Math.max(...Object.values(posteriors)) > 30 ? "Medium" : "Low";
+
+  const summaries = {
+    "Anxiety": `Your patterns suggest a high correlation with anxiety symptoms. As a ${g_label} ${a_label}, this often manifests as a cycle of persistent worry.`,
+    "Depression": `The emotional depth of your statement reflects signs of clinical depression. For individuals in the ${a_label} group, this can feel like a heavy weight.`,
+    "Stress": `You are showing clear indicators of high-level stress. This is common in the ${a_label} profile when responsibilities exceed capacity.`,
+    "Normal": `Your current statement aligns with a stable mental state.`,
+    "Suicidal": "URGENT: Your statement contains markers of severe crisis. Please contact a helpline immediately."
+  };
+
+  const tips_pool = {
+    "Anxiety": ["Deep belly breathing", "Limit screen time before bed", "Grounding: 5-4-3-2-1 technique", "Write down worries"],
+    "Depression": ["Step outside for 5 mins", "Reach out to one person today", "Listen to upbeat music", "Focus on one small task"],
+    "Stress": ["Prioritize and delegate", "Take a short walk", "Practice mindfulness", "Clear work-life boundaries"],
+    "Normal": ["Keep up your routine", "Practice gratitude journaling", "Stay physically active", "Nurture social connections"],
+  };
+
+  return {
+    condition: top_condition,
+    confidence: confidence,
+    posteriorProbs: posteriors,
+    summary: summaries[top_condition] || summaries["Normal"],
+    tips: tips_pool[top_condition] || tips_pool["Normal"],
+    affirmation: "You are resilient, and understanding these patterns is the first step toward healing.",
+    isCrisis: is_crisis,
+    gender: g_label,
+    ageLabel: a_label
+  };
+}
+
 
 function renderResult(d) {
   const icon = ICONS[d.condition] || "✨";
