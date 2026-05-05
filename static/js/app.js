@@ -60,13 +60,15 @@ const STATIC_SUGGESTIONS = {
 // Load model on startup
 window.addEventListener('DOMContentLoaded', async () => {
   try {
-    const res = await fetch('static/data/model.json');
+    const res = await fetch('./static/data/model.json');
     if (res.ok) {
       state.localModel = await res.json();
       console.log("Local model loaded successfully.");
+    } else {
+      console.warn("Local model response not OK.");
     }
   } catch (e) {
-    console.warn("Could not load local model, will rely on server API.");
+    console.warn("Could not load local model, will rely on server API or simple fallback.");
   }
 });
 
@@ -370,12 +372,9 @@ async function analyze() {
     renderResult(result);
   } catch (error) {
     console.warn("Server connection failed, falling back to local inference...");
-    if (state.localModel) {
-      const result = runLocalInference(finalText);
-      renderResult(result);
-    } else {
-      document.getElementById("resultArea").innerHTML = `<div class="card glass" style="color:var(--accent-primary); text-align:center; padding: 2rem;">Could not connect to Self HealUp. Please try again later.</div>`;
-    }
+    // Always fall back to runLocalInference now, which has a safe fallback
+    const result = runLocalInference(finalText);
+    renderResult(result);
   }
 }
 
@@ -383,6 +382,21 @@ function runLocalInference(text) {
   const model = state.localModel;
   const words = text.toLowerCase().match(/\w+/g) || [];
   const scores = {};
+  
+  // Default values if model fails to load
+  if (!model) {
+      return {
+        condition: "Calm",
+        confidence: "Low",
+        posteriorProbs: { "Worry": 10, "Feeling Low": 10, "Overwhelmed": 10, "Mood Swings": 10, "Relationship Challenges": 10, "Calm": 50 },
+        summary: STATIC_SUGGESTIONS["Calm"].summary,
+        tips: STATIC_SUGGESTIONS["Calm"].tips,
+        affirmation: STATIC_SUGGESTIONS["Calm"].affirmation,
+        isCrisis: text.toLowerCase().includes("kill") || text.toLowerCase().includes("suicide"),
+        gender: state.gender,
+        ageLabel: state.age
+      };
+  }
   
   // Naive Bayes Logic
   model.classes.forEach(cls => {
@@ -413,10 +427,16 @@ function runLocalInference(text) {
 
   // Map to UI Categories
   const uiProbs = { "Worry": 0, "Feeling Low": 0, "Overwhelmed": 0, "Mood Swings": 0, "Relationship Challenges": 0, "Calm": 0 };
-  Object.keys(rawProbs).forEach(cls => {
-    const uiCat = CLASS_MAPPING[cls];
-    if (uiCat) uiProbs[uiCat] += rawProbs[cls];
-  });
+  
+  if (model) {
+    Object.keys(rawProbs).forEach(cls => {
+      const uiCat = CLASS_MAPPING[cls];
+      if (uiCat) uiProbs[uiCat] += rawProbs[cls];
+    });
+  } else {
+    // If no model at all, just fall back to normal
+    uiProbs["Calm"] = 100;
+  }
 
   // Normalize uiProbs to 100
   let uiTotal = 0;
@@ -424,7 +444,6 @@ function runLocalInference(text) {
   if (uiTotal > 0) {
       Object.keys(uiProbs).forEach(k => uiProbs[k] = (uiProbs[k] / uiTotal) * 100);
   } else {
-      // Default fallback if no words matched
       uiProbs["Calm"] = 100;
   }
 

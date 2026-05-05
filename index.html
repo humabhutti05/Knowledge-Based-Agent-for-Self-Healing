@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Knowledge Based Agent for Self Healing</title>
-  <link rel="stylesheet" href="static/css/style.css"/>
+  <title>Self HealUp — Premium AI Wellbeing Agent</title>
+  <link rel="stylesheet" href="/static/css/style.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
@@ -83,7 +83,7 @@
       <!-- STEP 2: Input -->
       <section class="card glass" id="step2" style="display:none">
         <h2 class="card-title">Share Your Thoughts</h2>
-        <p class="card-desc">Type freely in English or Roman Urdu (e.g. "Mujhe bohot tension hai")</p>
+        <p class="card-desc">Type freely in English or Roman Urdu (e.g. "Mujhe bohot tension hai"). Self HealUp analyzes your words to provide insights.</p>
 
         <div class="guided-prompts" id="guidedPromptsContainer" style="display:none;">
           <div class="prompt-title">Guided Reflection</div>
@@ -106,7 +106,10 @@
       <!-- STEP 3: Results -->
       <section id="step3" style="display:none">
         <div id="resultArea"></div>
-        <button class="btn ghost-btn" onclick="reset()">Start New Assessment</button>
+        <div class="action-footer dual" style="margin-top: 2rem;">
+          <button class="btn secondary" onclick="goStep2FromStep3()">Edit</button>
+          <button class="btn ghost-btn" onclick="reset()" style="margin-top:0; ">New</button>
+        </div>
       </section>
     </main>
 
@@ -115,7 +118,7 @@
     </footer>
   </div>
 
-  <script src="static/js/app.js"></script>
+  <script src="/static/js/app.js"></script>
 </body>
 </html>
 
