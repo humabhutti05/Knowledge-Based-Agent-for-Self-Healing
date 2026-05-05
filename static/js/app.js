@@ -10,8 +10,66 @@ let state = {
   age: null,
   text: "",
   responses: {}, // To store Yes/No answers: { index: "Yes"/"No" }
-  model: null // To store the fetched model.json
+  localModel: null // Store local Naive Bayes model
 };
+
+// Map model.json classes to UI indicators
+const CLASS_MAPPING = {
+  "Anxiety": "Worry",
+  "Normal": "Calm",
+  "Depression": "Feeling Low",
+  "Suicidal": "Feeling Low",
+  "Stress": "Overwhelmed",
+  "Bipolar": "Mood Swings",
+  "Personality disorder": "Relationship Challenges"
+};
+
+const STATIC_SUGGESTIONS = {
+  "Worry": {
+    summary: "Aapka brain shayad kisi unwanted pressure ya uncertainty ki wajah se overdrive mein hai. Yeh aksar future ki fikar ki wajah se hota hai.",
+    tips: ["Deep breathing exercises", "5-4-3-2-1 grounding technique", "Limit caffeine intake", "Write down your worries"],
+    affirmation: "I am safe, and I am in control of my breath."
+  },
+  "Feeling Low": {
+    summary: "Emotional thakawat aur mayusi aapki energy drain kar rahi hai. Choti baaton par focus karna mushkil lag raha hai.",
+    tips: ["Go for a short walk", "Talk to a trusted friend", "Listen to uplifting music", "Sunlight exposure"],
+    affirmation: "This feeling is temporary. I am growing stronger each day."
+  },
+  "Overwhelmed": {
+    summary: "Zindagi ki zimmedariyan aur thoughts ka bojh barh gaya hai. It feels like too much to handle at once.",
+    tips: ["Break tasks into small steps", "Say no to extra commitments", "Take a 15-minute screen break", "Prioritize sleep"],
+    affirmation: "One step at a time is enough."
+  },
+  "Mood Swings": {
+    summary: "Aapke emotions tezi se badal rahe hain, jo energy aur focus dono ko affect kar raha hai.",
+    tips: ["Keep a mood journal", "Maintain a regular sleep cycle", "Avoid emotional triggers", "Practice mindfulness"],
+    affirmation: "I embrace my emotions without letting them drive me."
+  },
+  "Relationship Challenges": {
+    summary: "Social interactions aur personal connections mein thori kashmakash mehsoos ho rahi hai.",
+    tips: ["Set healthy boundaries", "Practice active listening", "Focus on self-care", "Express feelings clearly"],
+    affirmation: "I deserve healthy and meaningful connections."
+  },
+  "Calm": {
+    summary: "Aapka emotional state stable hai. Yeh behtareen waqt hai naye goals set karne ka.",
+    tips: ["Continue your routine", "Help someone else", "Try a new hobby", "Reflect on your progress"],
+    affirmation: "I am at peace with myself and the world."
+  }
+};
+
+// Load model on startup
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('static/data/model.json');
+    if (res.ok) {
+      state.localModel = await res.json();
+      console.log("Local model loaded successfully.");
+    }
+  } catch (e) {
+    console.warn("Could not load local model, will rely on server API.");
+  }
+});
+
 
 // ── Prior Rules (Duplicated from app.py for static use) ──
 const PRIOR_RULES = {
@@ -306,16 +364,85 @@ async function analyze() {
       })
     });
     
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
+    if (!response.ok) throw new Error('Server not found');
     
     const result = await response.json();
     renderResult(result);
   } catch (error) {
-    document.getElementById("resultArea").innerHTML = `<div class="card glass" style="color:var(--accent-primary); text-align:center; padding: 2rem;">Could not connect to Self HealUp. Please try again later.</div>`;
-    console.error("Analysis Error:", error);
+    console.warn("Server connection failed, falling back to local inference...");
+    if (state.localModel) {
+      const result = runLocalInference(finalText);
+      renderResult(result);
+    } else {
+      document.getElementById("resultArea").innerHTML = `<div class="card glass" style="color:var(--accent-primary); text-align:center; padding: 2rem;">Could not connect to Self HealUp. Please try again later.</div>`;
+    }
   }
+}
+
+function runLocalInference(text) {
+  const model = state.localModel;
+  const words = text.toLowerCase().match(/\w+/g) || [];
+  const scores = {};
+  
+  // Naive Bayes Logic
+  model.classes.forEach(cls => {
+    let score = Math.log(model.class_priors[cls] || 1e-5);
+    words.forEach(word => {
+      if (model.word_probs[word]) {
+        const wordCount = model.word_probs[word][cls] || 0;
+        const totalWordsInClass = model.class_totals[cls];
+        score += Math.log((wordCount + 1) / (totalWordsInClass + model.vocab_size));
+      }
+    });
+    scores[cls] = score;
+  });
+
+  // Convert log scores to probabilities for UI
+  const maxScore = Math.max(...Object.values(scores));
+  const expScores = {};
+  let totalExp = 0;
+  Object.keys(scores).forEach(cls => {
+    expScores[cls] = Math.exp(scores[cls] - maxScore);
+    totalExp += expScores[cls];
+  });
+
+  const rawProbs = {};
+  Object.keys(expScores).forEach(cls => {
+    rawProbs[cls] = (expScores[cls] / totalExp) * 100;
+  });
+
+  // Map to UI Categories
+  const uiProbs = { "Worry": 0, "Feeling Low": 0, "Overwhelmed": 0, "Mood Swings": 0, "Relationship Challenges": 0, "Calm": 0 };
+  Object.keys(rawProbs).forEach(cls => {
+    const uiCat = CLASS_MAPPING[cls];
+    if (uiCat) uiProbs[uiCat] += rawProbs[cls];
+  });
+
+  // Normalize uiProbs to 100
+  let uiTotal = 0;
+  Object.values(uiProbs).forEach(v => uiTotal += v);
+  if (uiTotal > 0) {
+      Object.keys(uiProbs).forEach(k => uiProbs[k] = (uiProbs[k] / uiTotal) * 100);
+  } else {
+      // Default fallback if no words matched
+      uiProbs["Calm"] = 100;
+  }
+
+  // Find winner
+  const winner = Object.entries(uiProbs).reduce((a, b) => b[1] > a[1] ? b : a)[0] || "Calm";
+  const staticData = STATIC_SUGGESTIONS[winner] || STATIC_SUGGESTIONS["Calm"];
+
+  return {
+    condition: winner,
+    confidence: "Medium",
+    posteriorProbs: uiProbs,
+    summary: staticData.summary,
+    tips: staticData.tips,
+    affirmation: staticData.affirmation,
+    isCrisis: text.toLowerCase().includes("kill") || text.toLowerCase().includes("suicide"),
+    gender: state.gender,
+    ageLabel: state.age
+  };
 }
 
 
