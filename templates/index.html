@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Self HealUp — Premium AI Mental Health Agent</title>
+  <title>Self HealUp — Premium AI Wellbeing Agent</title>
   <link rel="stylesheet" href="/static/css/style.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -17,10 +17,10 @@
   <div class="app-container">
     <header class="app-header">
       <div class="logo">
-        <span class="logo-icon">✨</span>
+        <span class="logo-icon"></span>
         <h1>Self HealUp <span class="badge">AI</span></h1>
       </div>
-      <p class="subtitle">Advanced Neural Mental Health Inference · Powered by 53K Data Points</p>
+      <p class="subtitle">Advanced Neural Wellbeing Inference · Powered by 53K Data Points</p>
     </header>
 
     <div class="stepper">
@@ -33,16 +33,16 @@
       <!-- STEP 1: Profile -->
       <section class="card glass" id="step1">
         <h2 class="card-title">Identify Your Profile</h2>
-        <p class="card-desc">Our Bayesian engine adjusts its confidence based on your demographic risk factors.</p>
+        <p class="card-desc">Self HealUp uses these details to give you the best personalized advice.</p>
 
         <div class="input-group">
           <label class="group-label">Biological Gender</label>
           <div class="selection-grid gender-grid">
-            <button class="select-box" id="gMale" onclick="selectGender('male')">
+            <button class="select-box mini" id="gMale" onclick="selectGender('male')">
               <span class="icon">♂</span>
               <span class="label">Male</span>
             </button>
-            <button class="select-box" id="gFemale" onclick="selectGender('female')">
+            <button class="select-box mini" id="gFemale" onclick="selectGender('female')">
               <span class="icon">♀</span>
               <span class="label">Female</span>
             </button>
@@ -52,11 +52,26 @@
         <div class="input-group">
           <label class="group-label">Life Stage</label>
           <div class="selection-grid age-grid">
-            <button class="select-box mini" id="aTeen" onclick="selectAge('teen')">Teen</button>
-            <button class="select-box mini" id="aYoung" onclick="selectAge('young')">Young</button>
-            <button class="select-box mini" id="aAdult" onclick="selectAge('adult')">Adult</button>
-            <button class="select-box mini" id="aMid" onclick="selectAge('mid')">Middle</button>
-            <button class="select-box mini" id="aElderly" onclick="selectAge('elderly')">Elderly</button>
+            <button class="select-box mini" id="aTeen" onclick="selectAge('teen')">
+              <span class="label">Teen</span>
+              <span class="age-range">13–19</span>
+            </button>
+            <button class="select-box mini" id="aYoung" onclick="selectAge('young')">
+              <span class="label">Young</span>
+              <span class="age-range">20–35</span>
+            </button>
+            <button class="select-box mini" id="aAdult" onclick="selectAge('adult')">
+              <span class="label">Adult</span>
+              <span class="age-range">36–55</span>
+            </button>
+            <button class="select-box mini" id="aMid" onclick="selectAge('mid')">
+              <span class="label">Middle</span>
+              <span class="age-range">56–65</span>
+            </button>
+            <button class="select-box mini" id="aElderly" onclick="selectAge('elderly')">
+              <span class="label">Elderly</span>
+              <span class="age-range">65+</span>
+            </button>
           </div>
         </div>
 
@@ -68,30 +83,33 @@
       <!-- STEP 2: Input -->
       <section class="card glass" id="step2" style="display:none">
         <h2 class="card-title">Share Your Thoughts</h2>
-        <p class="card-desc">Type freely. Our neural engine analyzes linguistic patterns in real-time.</p>
+        <p class="card-desc">Type freely in English or Roman Urdu (e.g. "Mujhe bohot tension hai"). Self HealUp analyzes your words to provide insights.</p>
 
-        <div class="input-container">
-          <textarea id="feelingInput" placeholder="I've been feeling..."></textarea>
-          <div class="textarea-glow"></div>
+        <div class="guided-prompts" id="guidedPromptsContainer" style="display:none;">
+          <div class="prompt-title">Guided Reflection</div>
+          <div class="prompt-list" id="promptList"></div>
         </div>
 
-        <div class="tag-cloud">
-          <span class="tag" onclick="setTag('I feel a constant sense of dread and my heart races for no reason')">Anxious</span>
-          <span class="tag" onclick="setTag('Everything feels heavy and I have no energy to do things I love')">Depressed</span>
-          <span class="tag" onclick="setTag('The pressure at work is becoming unbearable, I can\'t disconnect')">Stressed</span>
-          <span class="tag" onclick="setTag('My mood shifts from euphoric to devastatingly low within hours')">Unstable</span>
+        <div id="customInputArea" style="display:none; margin-top: 1rem;">
+          <div class="input-container" style="margin-bottom: 0;">
+            <textarea id="feelingInput" placeholder="I've been feeling..." style="height: 80px;"></textarea>
+            <div class="textarea-glow"></div>
+          </div>
         </div>
 
         <div class="action-footer dual">
           <button class="btn secondary" onclick="goStep1()">Back</button>
-          <button class="btn primary" id="analyzeBtn" onclick="analyze()">Run Neural Inference</button>
+          <button class="btn primary" id="analyzeBtn" onclick="analyze()">Run Analysis</button>
         </div>
       </section>
 
       <!-- STEP 3: Results -->
       <section id="step3" style="display:none">
         <div id="resultArea"></div>
-        <button class="btn ghost-btn" onclick="reset()">Start New Assessment</button>
+        <div class="action-footer dual" style="margin-top: 2rem;">
+          <button class="btn secondary" onclick="goStep2FromStep3()">Edit Response</button>
+          <button class="btn ghost-btn" onclick="reset()" style="margin-top:0;">New Assessment</button>
+        </div>
       </section>
     </main>
 

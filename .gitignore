@@ -9,5 +9,4 @@ ENV/
 .vscode/
 .idea/
 *.log
-train_model.py
-{static/
+data/history.json

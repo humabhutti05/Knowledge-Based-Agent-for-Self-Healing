@@ -1,7 +1,7 @@
 // ── Icons Map ──
 const ICONS = {
-  "Anxiety": "😰", "Depression": "😔", "Stress": "😤",
-  "Normal": "😊", "Suicidal": "🆘", "Bipolar": "🔄", "Personality disorder": "🧩"
+  "Worry": "😰", "Feeling Low": "😔", "Overwhelmed": "😤",
+  "Calm": "😊", "Crisis": "🆘", "Mood Swings": "🔄", "Relationship Challenges": "🧩"
 };
 
 // ── State ──
@@ -9,6 +9,7 @@ let state = {
   gender: null,
   age: null,
   text: "",
+  responses: {}, // To store Yes/No answers: { index: "Yes"/"No" }
   model: null // To store the fetched model.json
 };
 
@@ -33,6 +34,94 @@ const PRIOR_RULES = {
 const AGE_LABELS = {
   "teen": "Teen (13–19)", "young": "Young Adult (20–35)",
   "adult": "Adult (36–55)", "mid": "Middle Age (56–65)", "elderly": "Elderly (65+)"
+};
+
+// ── Guided Prompts ──
+const GUIDED_QUESTIONS = {
+  "male": {
+    "teen": [
+      "Do you feel constant pressure to perform well in studies?",
+      "Is social media making you feel less confident about yourself?",
+      "Are you struggling with sleep because of late-night thoughts?",
+      "Do you feel disconnected from your parents or siblings?",
+      "Are you worried about what you will do after finishing school?",
+      "Do you feel like your friends don't truly understand you?"
+    ],
+    "young": [
+      "Is career uncertainty or work pressure weighing you down?",
+      "Do you feel lonely even when you are with other people?",
+      "Are you struggling to balance your job with personal life?",
+      "Do you feel constant pressure to achieve financial success?",
+      "Are relationship issues affecting your mental peace?",
+      "Do you find it hard to stay motivated for your goals?"
+    ],
+    "adult": [
+      "How is the balance between your job and family life right now?",
+      "Are financial or professional responsibilities causing constant worry?",
+      "Do you feel you have enough time for your own mental wellbeing?",
+      "Are you worried about the future stability of your family?",
+      "Do you feel appreciated for the work you do at home and office?",
+      "Is physical health becoming a source of stress for you?"
+    ],
+    "mid": [
+      "Are you experiencing stress regarding future stability or retirement?",
+      "How are changes in your health or energy levels affecting you?",
+      "Do you feel a sense of isolation or disconnect from younger generations?",
+      "Are you worried about the health of your elderly parents or spouse?",
+      "Do you feel that you've achieved what you wanted in life?",
+      "Is the 'empty nest' feeling making you feel sad or purposeless?"
+    ],
+    "elderly": [
+      "Are you feeling lonely or missing people who are no longer around?",
+      "How is your physical health impacting your mood today?",
+      "Do you find it difficult to find purpose in your daily activities?",
+      "Do you feel like you are a burden to your family members?",
+      "Are memories of the past making you feel regretful or sad?",
+      "Do you have someone you can talk to about your true feelings?"
+    ]
+  },
+  "female": {
+    "teen": [
+      "Do you feel judged by your peers based on your appearance?",
+      "Is academic competition causing you constant anxiety?",
+      "Do you feel like you have to hide your true feelings from friends?",
+      "Are you experiencing mood swings that you can't explain?",
+      "Do you feel overwhelmed by the expectations of being 'perfect'?",
+      "Is social media pressure making you feel inadequate?"
+    ],
+    "young": [
+      "Are you feeling burnt out from balancing career and home expectations?",
+      "Do you feel anxious about your future life choices like marriage?",
+      "Is the pressure to look or behave a certain way exhausting you?",
+      "Do you feel you lack a strong emotional support system?",
+      "Are you finding it hard to set boundaries with people in your life?",
+      "Do you often feel like you're falling behind your peers' milestones?"
+    ],
+    "adult": [
+      "How is the weight of family responsibilities affecting your time?",
+      "Do you feel overwhelmed by the 'invisible mental load' of daily life?",
+      "Are you finding it hard to cope with workplace stress and home duties?",
+      "Do you feel your personal needs are always last on the priority list?",
+      "Are you worried about the upbringing or future of your children?",
+      "Do you feel a loss of your own identity outside of being a mother/wife?"
+    ],
+    "mid": [
+      "Are life transitions or empty-nest feelings causing you sadness?",
+      "How are you coping with changes in your physical wellbeing (e.g. menopause)?",
+      "Do you feel that your emotional needs are being met by those around you?",
+      "Are you worried about your financial independence in the future?",
+      "Do you feel a sense of regret about things you couldn't do earlier?",
+      "Is the health of your partner or parents a constant source of worry?"
+    ],
+    "elderly": [
+      "Do you often feel isolated or disconnected from your family?",
+      "How do memories of the past affect your current emotional state?",
+      "Are health concerns making it difficult for you to stay positive?",
+      "Do you feel that your wisdom and presence are valued by others?",
+      "Are you afraid of the future or of losing your independence?",
+      "Do you find comfort in your daily routine, or does it feel empty?"
+    ]
+  }
 };
 
 // ── Initialization ──
@@ -68,10 +157,89 @@ function checkStep1() {
 }
 
 // ── Navigation ──
-function goStep2() {
+function goStep2(isBack = false) {
   document.getElementById("step1").style.display = "none";
   document.getElementById("step2").style.display = "block";
+  
+  if (!isBack) {
+    state.responses = {}; // Only reset if moving forward from Step 1
+  }
+  
+  renderQuestions();
   updateStepper(2);
+}
+
+function goStep2FromStep3() {
+  document.getElementById("step3").style.display = "none";
+  document.getElementById("step2").style.display = "block";
+  document.getElementById("analyzeBtn").disabled = false;
+  document.getElementById("analyzeBtn").textContent = "Run Analysis";
+  updateStepper(2);
+}
+
+function renderQuestions() {
+  const prompts = GUIDED_QUESTIONS[state.gender][state.age] || [];
+  const promptList = document.getElementById("promptList");
+  
+  let html = prompts.map((p, idx) => `
+    <div class="mcq-item">
+      <div class="mcq-question">${p}</div>
+      <div class="mcq-options">
+        <button class="mcq-btn" onclick="selectMCQ(${idx}, 'Yes', this)">Yes</button>
+        <button class="mcq-btn" onclick="selectMCQ(${idx}, 'No', this)">No</button>
+      </div>
+    </div>
+  `).join('');
+
+  // Add "Others" option
+  html += `
+    <div class="mcq-item">
+      <div class="mcq-question">Anything else you'd like to share? (Optional)</div>
+      <div class="mcq-options">
+        <button class="mcq-btn" onclick="toggleOthers(this)">Others / Custom</button>
+      </div>
+    </div>
+  `;
+
+  promptList.innerHTML = html;
+  document.getElementById("guidedPromptsContainer").style.display = "block";
+  
+  // Restore previous selections if any
+  Object.entries(state.responses).forEach(([idx, val]) => {
+    const items = document.querySelectorAll(".mcq-item");
+    if (items[idx]) {
+      const btn = Array.from(items[idx].querySelectorAll(".mcq-btn")).find(b => b.textContent === val);
+      if (btn) btn.classList.add("selected");
+    }
+  });
+
+  // Hide textarea initially, show only if "Others" is clicked
+  document.getElementById("customInputArea").style.display = "none";
+}
+
+function selectMCQ(idx, val, btn) {
+  state.responses[idx] = val;
+  
+  // Update button UI
+  const parent = btn.parentElement;
+  parent.querySelectorAll(".mcq-btn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+}
+
+function toggleOthers(btn) {
+  const area = document.getElementById("customInputArea");
+  const isHidden = area.style.display === "none";
+  area.style.display = isHidden ? "block" : "none";
+  btn.classList.toggle("selected", isHidden);
+  if (isHidden) {
+    document.getElementById("feelingInput").focus();
+  }
+}
+
+function selectPrompt(btn) {
+  const input = document.getElementById("feelingInput");
+  input.value = btn.textContent + "\n\n";
+  input.focus();
 }
 
 function goStep1() {
@@ -92,12 +260,29 @@ function setTag(t) {
 
 // ── Inference Engine ──
 async function analyze() {
-  const text = document.getElementById("feelingInput").value.trim();
-  if (!text) return;
+  // Construct the text from MCQ responses and custom input
+  let finalText = "";
+  const questions = GUIDED_QUESTIONS[state.gender][state.age] || [];
+  
+  Object.entries(state.responses).forEach(([idx, ans]) => {
+    if (ans === "Yes") {
+      finalText += questions[idx] + " Yes. ";
+    }
+  });
+
+  const customText = document.getElementById("feelingInput").value.trim();
+  if (customText) {
+    finalText += "\n" + customText;
+  }
+
+  if (!finalText.trim()) {
+    alert("Please answer some questions or share your thoughts first.");
+    return;
+  }
 
   const btn = document.getElementById("analyzeBtn");
   btn.disabled = true;
-  btn.textContent = "Processing Neural Data...";
+  btn.textContent = "Analyzing...";
 
   // Show results area with loading
   document.getElementById("step2").style.display = "none";
@@ -106,101 +291,61 @@ async function analyze() {
 
   document.getElementById("resultArea").innerHTML = `
     <div class="card glass" style="text-align:center; padding: 4rem;">
-      <div class="logo-icon animate-pulse">🧠</div>
-      <p style="margin-top: 1rem; color: var(--text-muted);">Integrating prior probabilities with statement evidence...</p>
+      <div class="logo-icon animate-pulse">✨</div>
+      <p style="margin-top: 1rem; color: var(--text-muted);">Self HealUp is carefully thinking about what you said...</p>
     </div>`;
 
-  // Local Neural Analysis (Ported from Python)
-  setTimeout(() => {
-    const result = runNeuralInference(text);
-    renderResult(result);
-  }, 800); // Simulate processing time for UX
-}
-
-function runNeuralInference(text) {
-  const priors = PRIOR_RULES[state.gender][state.age];
-  const g_label = state.gender === "male" ? "Male" : "Female";
-  const a_label = AGE_LABELS[state.age];
-
-  let posteriors = {};
-  let top_condition = "Normal";
-
-  if (state.model) {
-    const tokens = text.toLowerCase().match(/\w+/g) || [];
-    const classes = state.model.classes;
-    const vocab_size = state.model.vocab_size;
-    const profile_weights = Object.fromEntries(Object.entries(priors).map(([k, v]) => [k, v / 100]));
+  try {
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: finalText,
+        gender: state.gender,
+        age: state.age
+      })
+    });
     
-    let class_scores = {};
-    for (let c of classes) {
-      const data_prior = state.model.class_priors[c] || (1 / classes.length);
-      const profile_prior = profile_weights[c] || 0.1;
-      
-      let score = Math.log(data_prior * profile_prior);
-      for (let token of tokens) {
-        const count = (state.model.word_probs[token] && state.model.word_probs[token][c]) || 0;
-        const prob = (count + 1) / (state.model.class_totals[c] + vocab_size);
-        score += Math.log(prob);
-      }
-      class_scores[c] = score;
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
     }
-
-    const max_score = Math.max(...Object.values(class_scores));
-    const exp_scores = Object.fromEntries(Object.entries(class_scores).map(([k, v]) => [k, Math.exp(v - max_score)]));
-    const total_exp = Object.values(exp_scores).reduce((a, b) => a + b, 0);
     
-    posteriors = Object.fromEntries(Object.entries(exp_scores).map(([k, v]) => [k, (v / total_exp) * 100]));
-    top_condition = Object.keys(posteriors).reduce((a, b) => posteriors[a] > posteriors[b] ? a : b);
-  } else {
-    // Basic fallback if model didn't load
-    posteriors = {...priors};
-    top_condition = "Normal";
+    const result = await response.json();
+    renderResult(result);
+  } catch (error) {
+    document.getElementById("resultArea").innerHTML = `<div class="card glass" style="color:var(--accent-primary); text-align:center; padding: 2rem;">Could not connect to Self HealUp. Please try again later.</div>`;
+    console.error("Analysis Error:", error);
   }
-
-  const is_crisis = text.toLowerCase().includes("kill") || text.toLowerCase().includes("suicide") || posteriors["Suicidal"] > 40;
-  const confidence = Math.max(...Object.values(posteriors)) > 60 ? "High" : Math.max(...Object.values(posteriors)) > 30 ? "Medium" : "Low";
-
-  const summaries = {
-    "Anxiety": `Your patterns suggest a high correlation with anxiety symptoms. As a ${g_label} ${a_label}, this often manifests as a cycle of persistent worry.`,
-    "Depression": `The emotional depth of your statement reflects signs of clinical depression. For individuals in the ${a_label} group, this can feel like a heavy weight.`,
-    "Stress": `You are showing clear indicators of high-level stress. This is common in the ${a_label} profile when responsibilities exceed capacity.`,
-    "Normal": `Your current statement aligns with a stable mental state.`,
-    "Suicidal": "URGENT: Your statement contains markers of severe crisis. Please contact a helpline immediately."
-  };
-
-  const tips_pool = {
-    "Anxiety": ["Deep belly breathing", "Limit screen time before bed", "Grounding: 5-4-3-2-1 technique", "Write down worries"],
-    "Depression": ["Step outside for 5 mins", "Reach out to one person today", "Listen to upbeat music", "Focus on one small task"],
-    "Stress": ["Prioritize and delegate", "Take a short walk", "Practice mindfulness", "Clear work-life boundaries"],
-    "Normal": ["Keep up your routine", "Practice gratitude journaling", "Stay physically active", "Nurture social connections"],
-  };
-
-  return {
-    condition: top_condition,
-    confidence: confidence,
-    posteriorProbs: posteriors,
-    summary: summaries[top_condition] || summaries["Normal"],
-    tips: tips_pool[top_condition] || tips_pool["Normal"],
-    affirmation: "You are resilient, and understanding these patterns is the first step toward healing.",
-    isCrisis: is_crisis,
-    gender: g_label,
-    ageLabel: a_label
-  };
 }
 
 
 function renderResult(d) {
   const icon = ICONS[d.condition] || "✨";
   
+  // ── Normalize probabilities to always sum to exactly 100% ──
+  const rawProbs = d.posteriorProbs;
+  const rawTotal = Object.values(rawProbs).reduce((a, b) => a + b, 0);
+  const normalized = {};
+  let normTotal = 0;
+  const keys = Object.keys(rawProbs);
+  keys.forEach((k, i) => {
+    if (i === keys.length - 1) {
+      normalized[k] = 100 - normTotal; // Last item absorbs rounding error
+    } else {
+      normalized[k] = Math.round((rawProbs[k] / rawTotal) * 100);
+      normTotal += normalized[k];
+    }
+  });
+
   // Sort and build probability bars
-  const sortedProbs = Object.entries(d.posteriorProbs).sort((a, b) => b[1] - a[1]);
+  const sortedProbs = Object.entries(normalized).sort((a, b) => b[1] - a[1]);
   const probBars = sortedProbs.map(([name, val]) => `
     <div class="prob-item">
       <span class="prob-name">${name}</span>
       <div class="prob-track">
         <div class="prob-bar" style="width: ${val}%; opacity: ${name === d.condition ? 1 : 0.3}"></div>
       </div>
-      <span class="prob-val" style="width: 40px; text-align: right; font-size: 0.8rem;">${Math.round(val)}%</span>
+      <span class="prob-val" style="width: 40px; text-align: right; font-size: 0.8rem;">${val}%</span>
     </div>
   `).join("");
 
@@ -234,7 +379,7 @@ function renderResult(d) {
         </div>
 
         <div class="input-group">
-          <label class="group-label">Neural Recommendations</label>
+          <label class="group-label">Helpful Activities to try right now</label>
           <div class="tips-grid">
             ${tips}
           </div>
@@ -249,14 +394,14 @@ function renderResult(d) {
 }
 
 function reset() {
-  state = { gender: null, age: null, text: "" };
+  state = { gender: null, age: null, text: "", responses: {} };
   document.getElementById("feelingInput").value = "";
   document.querySelectorAll(".select-box").forEach(el => el.classList.remove("selected"));
   document.getElementById("step3").style.display = "none";
   document.getElementById("step1").style.display = "block";
   document.getElementById("nextBtn").disabled = true;
   document.getElementById("analyzeBtn").disabled = false;
-  document.getElementById("analyzeBtn").textContent = "Run Neural Inference";
+  document.getElementById("analyzeBtn").textContent = "Run Analysis";
   updateStepper(1);
 }
 

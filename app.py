@@ -1,10 +1,28 @@
+import flask
 from flask import Flask, render_template, request, jsonify
 import json
 import os
 import random
 import re
 import math
+import google.generativeai as genai
 
+# Configure Gemini — Load API key from .env file
+from dotenv import load_dotenv
+load_dotenv()
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+genai.configure(api_key=GEMINI_API_KEY)
+generation_config = {
+  "temperature": 0.7,
+  "top_p": 0.95,
+  "top_k": 64,
+  "max_output_tokens": 1024,
+  "response_mime_type": "application/json",
+}
+model = genai.GenerativeModel(
+  model_name="gemini-flash-latest",
+  generation_config=generation_config,
+)
 app = Flask(__name__)
 
 # ─── Load Local Trained Model ───────────────────────────────────────────────
@@ -44,6 +62,37 @@ AGE_LABELS = {
     "elderly": "Elderly (65+)"
 }
 
+# ─── Data Logging ───────────────────────────────────────────────────────────
+HISTORY_PATH = os.path.join(os.path.dirname(__file__), 'data', 'history.json')
+
+def save_assessment(result, user_text):
+    try:
+        from datetime import datetime
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "user_text": user_text,
+            "gender": result.get("gender"),
+            "age": result.get("ageLabel"),
+            "prediction": result.get("condition"),
+            "confidence": result.get("confidence"),
+            "posteriorProbs": result.get("posteriorProbs")
+        }
+        
+        history = []
+        if os.path.exists(HISTORY_PATH):
+            try:
+                with open(HISTORY_PATH, 'r') as f:
+                    history = json.load(f)
+            except:
+                history = []
+        
+        history.append(log_entry)
+        
+        with open(HISTORY_PATH, 'w') as f:
+            json.dump(history, f, indent=2)
+    except Exception as e:
+        print(f"Error saving history: {e}")
+
 # client = anthropic.Anthropic()  # Removed Anthropic dependency
 
 @app.route("/")
@@ -72,108 +121,71 @@ def analyze():
     g_label   = "Male" if gender == "male" else "Female"
     a_label   = AGE_LABELS.get(age, age)
 
-    # ─── Inference Logic ─────────────────────────────────────────────────────
-    if MODEL_DATA:
-        # Use Trained Naive Bayes Model
-        tokens = re.findall(r'\w+', text.lower())
-        classes = MODEL_DATA["classes"]
-        vocab_size = MODEL_DATA["vocab_size"]
+    # ─── Gemini Inference Logic ────────────────────────────────────────────────
+    prompt = f"""
+Analyze the feelings of a {g_label} ({a_label}) who said: "{text}"
+
+Identify the intensities for these categories: Worry, Feeling Low, Overwhelmed, Mood Swings, Relationship Challenges, Calm.
+The total sum of probabilities MUST be 100.
+
+Respond ONLY with this JSON format:
+{{
+  "condition": "Primary Feeling Name",
+  "confidence": "High/Medium/Low",
+  "posteriorProbs": {{
+    "Worry": 15,
+    "Feeling Low": 10,
+    ... (all 6 categories summing to 100)
+  }},
+  "summary": "2 sentences in user's language (Roman Urdu/English) explaining why they feel this way.",
+  "tips": ["Tip 1", "Tip 2", "Tip 3", "Tip 4"],
+  "affirmation": "Short positive sentence.",
+  "isCrisis": false
+}}
+"""
+
+    try:
+        response = model.generate_content(prompt)
+        raw_text = response.text.strip()
         
-        # Start with log priors from the training data combined with profile priors
-        # Profile priors are 0-100, we convert to relative weights
-        profile_weights = {k: v/100 for k, v in priors.items()}
+        # Clean markdown
+        if "```" in raw_text:
+            raw_text = re.sub(r"```[a-z]*\n?", "", raw_text)
+            raw_text = raw_text.replace("```", "")
+        raw_text = raw_text.strip()
         
-        class_scores = {}
-        for c in classes:
-            # P(C) - combining dataset prior with profile prior
-            data_prior = MODEL_DATA["class_priors"].get(c, 1/len(classes))
-            profile_prior = profile_weights.get(c, 0.1) # fallback
-            
-            # Log probability to avoid underflow
-            score = math.log(data_prior * profile_prior)
-            
-            # P(W|C) - adding log likelihoods for each token
-            for token in tokens:
-                count = MODEL_DATA["word_probs"].get(token, {}).get(c, 0)
-                # Laplace smoothing
-                prob = (count + 1) / (MODEL_DATA["class_totals"].get(c, 0) + vocab_size)
-                score += math.log(prob)
-            
-            class_scores[c] = score
-
-        # Convert back from log space to probabilities for UI
-        # Shift scores for stability (exp(score - max_score))
-        max_score = max(class_scores.values())
-        exp_scores = {k: math.exp(v - max_score) for k, v in class_scores.items()}
-        total_exp = sum(exp_scores.values())
+        print(f"Gemini Response: {raw_text}", flush=True)
+        result_data = json.loads(raw_text)
         
-        posteriors = {k: round((v / total_exp) * 100, 2) for k, v in exp_scores.items()}
-        top_condition = max(posteriors, key=posteriors.get)
+        # Add required UI fields
+        result_data["gender"] = g_label
+        result_data["ageLabel"] = a_label
         
-    else:
-        # Fallback to simple keyword matcher if model not ready
-        keywords = {
-            "Anxiety": ["worried", "anxious", "panic", "heart racing", "nervous", "fear", "scared"],
-            "Depression": ["sad", "hopeless", "tired", "crying", "alone", "dark", "numb", "worthless"],
-            "Stress": ["busy", "pressure", "deadline", "overwhelmed", "work", "exhausted", "tension"],
-            "Bipolar": ["mood swings", "manic", "hyper", "low", "energy", "unstable"],
-            "Suicidal": ["end it", "kill", "goodbye", "no point", "harm", "die", "suicide"],
-            "Personality disorder": ["relationships", "self-image", "impulsive", "splitting"],
-            "Normal": ["okay", "fine", "good", "stable", "happy", "normal"]
-        }
-        scores = {k: 0 for k in priors.keys()}
-        for condition, terms in keywords.items():
-            if condition in scores:
-                for term in terms:
-                    if term in text.lower(): scores[condition] += 2
+        # ─── Save User Data ──────────────────────────────────────────────────
+        save_assessment(result_data, text)
         
-        total = sum(priors.values())
-        posteriors = {}
-        for k, p_val in priors.items():
-            multiplier = 1 + (scores.get(k, 0) * 0.5)
-            posteriors[k] = p_val * multiplier
+        return jsonify(result_data)
         
-        norm_total = sum(posteriors.values())
-        posteriors = {k: round((v / norm_total) * 100, 2) for k, v in posteriors.items()}
-        top_condition = max(posteriors, key=posteriors.get)
-
-    # ─── Shared Logic (Confidence, Crisis, Content) ──────────────────────────
-    is_crisis = "kill" in text.lower() or "suicide" in text.lower() or "end it" in text.lower()
-    if posteriors.get("Suicidal", 0) > 40: is_crisis = True # High suicidal prob
-    
-    confidence = "High" if max(posteriors.values()) > 60 else "Medium" if max(posteriors.values()) > 30 else "Low"
-
-    summaries = {
-        "Anxiety": f"Your patterns suggest a high correlation with anxiety symptoms. As a {g_label} {a_label}, this often manifests as a cycle of persistent worry and physical tension.",
-        "Depression": f"The emotional depth of your statement reflects signs of clinical depression. For individuals in the {a_label} group, this can feel like a heavy, unchanging weight.",
-        "Stress": f"You are showing clear indicators of high-level stress. This is common in the {a_label} profile when responsibilities exceed perceived capacity.",
-        "Normal": f"Your current statement aligns with a stable mental state, though you remain proactive about your wellbeing.",
-        "Suicidal": "URGENT: Your statement contains markers of severe crisis. We strongly urge you to contact a helpline immediately."
-    }
-    summary = summaries.get(top_condition, f"Analysis suggests {top_condition} is the primary driver of your current state.")
-
-    tips_pool = {
-        "Anxiety": ["Deep belly breathing", "Limit screen time before bed", "Grounding: 5-4-3-2-1 technique", "Write down worries to externalize them"],
-        "Depression": ["Step outside for 5 mins", "Reach out to one person today", "Listen to upbeat music", "Focus on one small task"],
-        "Stress": ["Prioritize and delegate", "Take a short walk", "Practice mindfulness", "Establish clear work-life boundaries"],
-        "Normal": ["Keep up your routine", "Practice gratitude journaling", "Stay physically active", "Nurture your social connections"],
-    }
-    tips = tips_pool.get(top_condition, tips_pool["Normal"])[:4]
-
-    result = {
-        "condition": top_condition,
-        "confidence": confidence,
-        "posteriorProbs": posteriors,
-        "summary": summary,
-        "tips": tips,
-        "affirmation": f"You are resilient, and understanding these patterns is the first step toward healing.",
-        "isCrisis": is_crisis,
-        "gender": g_label,
-        "ageLabel": a_label
-    }
-
-    return jsonify(result)
-
+    except Exception as e:
+        import traceback
+        with open("error.log", "w") as f:
+            f.write(str(e) + "\n")
+            f.write(traceback.format_exc() + "\n")
+            if 'raw_text' in locals():
+                f.write("\nRAW TEXT:\n" + raw_text)
+        print(f"Gemini API Error: {e}", flush=True)
+        # Fallback if Gemini fails
+        return jsonify({
+            "condition": "Calm",
+            "confidence": "Low",
+            "posteriorProbs": {"Calm": 100, "Worry": 0, "Feeling Low": 0},
+            "summary": "We couldn't connect right now, but please know you are heard.",
+            "tips": ["Take a deep breath", "Drink some water", "Rest your eyes", "Talk to a friend"],
+            "affirmation": "You are resilient.",
+            "isCrisis": False,
+            "gender": g_label,
+            "ageLabel": a_label
+        })
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
