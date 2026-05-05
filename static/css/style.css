@@ -218,15 +218,16 @@ textarea:focus + .textarea-glow { opacity: 0.1; }
   flex-shrink: 0;
 }
 .mcq-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-glass);
-  color: var(--text-muted);
-  padding: 8px 20px;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-glass);
+    color: var(--text-muted);
+    padding: 6px 16px; /* smaller padding */
+    border-radius: 8px;
+    font-size: 0.75rem; /* smaller font */
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 8px; /* space between buttons */
 }
 .mcq-btn:hover {
   background: rgba(255, 255, 255, 0.1);
@@ -274,7 +275,7 @@ textarea:focus + .textarea-glow { opacity: 0.1; }
 .btn.secondary { background: transparent; border-color: var(--border-glass); color: var(--text-main); }
 .btn.secondary:hover { background: rgba(255,255,255,0.05); }
 
-.btn.ghost-btn { width: 100%; margin-top: 2rem; color: var(--text-muted); background: transparent; border: 1px solid var(--border-glass); }
+.btn.ghost-btn { width: auto; padding: 0.6rem 1.2rem; margin-top: 2rem; }
 
 .action-footer { display: flex; justify-content: flex-end; }
 .action-footer.dual { justify-content: space-between; }
