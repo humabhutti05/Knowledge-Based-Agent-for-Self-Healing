@@ -63,28 +63,41 @@ AGE_LABELS = {
     "elderly": "Elderly (65+)"
 }
 
-# ─── Fallback Knowledge Base (When API Fails) ────────────────────────────────
+# ─── Fallback Knowledge Base (Granular & Demographic-Specific) ───────────────
 FALLBACK_RESOURCES = {
-    "Worry": {
-        "summary": "Aapka brain shayad kisi unwanted pressure ya uncertainty ki wajah se overdrive mein hai. Yeh aksar future ki fikar ki wajah se hota hai.",
-        "tips": ["Deep breathing exercises (5 mins)", "5-4-3-2-1 grounding technique", "Caffeine kam karein", "Apni fikron ko ek diary mein likhein"],
-        "affirmation": "Main mehfooz hoon, aur meri saans mere control mein hai."
+    "male": {
+        "teen": {
+            "Worry": {"summary": "Study pressure aur social acceptance ka bojh teen boys par kaafi hota hai.", "tips": ["Study sessions ke beech 15 min break lein", "Physical activity (football/gym) shuru karein", "Caffeine kam karein", "Apne kisi dost se dil ki baat karein"], "affirmation": "Main apni mehnat se har mushkil paar kar sakta hoon."},
+            "Feeling Low": {"summary": "Aksar is umer mein akelapan aur doston ki kami mehsoos hoti hai.", "tips": ["Screen time kam karein", "Subah ki dhoop mein 10 min guzarein", "Apna pasandida music sunein", "Family ke sath thora waqt bitayein"], "affirmation": "Har din ek naya mouqa hai behtar banne ka."},
+            "Overwhelmed": {"summary": "Boht sari umeedon aur future ki fikar ka bojh.", "tips": ["Ek waqt mein ek kaam karein", "Bari cheezon ko chotay hisson mein divide karein", "Gheri saans lein", "Social media se break lein"], "affirmation": "Main kafi hoon aur main handle kar sakta hoon."}
+        },
+        "young": {
+            "Worry": {"summary": "Career aur financial stability ki fikar is umer mein aam hai.", "tips": ["Monthly budget banayein", "Apne career goals ko likh lein", "7-8 ghante ki neend puri karein", "Work-life balance banayein"], "affirmation": "Meri mehnat rang layegi."},
+            "Relationship Challenges": {"summary": "Commitments aur social life ka balance mushkil lag sakta hai.", "tips": ["Clear communication rakhein", "Healthy boundaries set karein", "Self-care ko priority dein", "Gusso par control rakhein"], "affirmation": "Main izzat aur mohabbat ke qabil hoon."}
+        },
+        "adult": {
+            "Overwhelmed": {"summary": "Ghar aur office ki zimmedariyan thaka deti hain.", "tips": ["Family ke sath quality time guzarein", "Hobby ke liye waqt nikalein", "Meditation shuru karein", "Zimmedariyan share karein"], "affirmation": "Main apne khandan ki taqat hoon."},
+            "Worry": {"summary": "Bacho ka mustaqbil aur sehat ki fikar.", "tips": ["Bacho ke sath khelein", "Financial planning karein", "Healthy lifestyle apnaein", "Tension kam lein"], "affirmation": "Sab theek ho jayega."}
+        }
     },
-    "Feeling Low": {
-        "summary": "Emotional thakawat aur mayusi aapki energy drain kar rahi hai. Choti baaton par focus karna mushkil lag raha hai.",
-        "tips": ["Ek choti walk par jayein", "Kisi qareebi dost se baat karein", "Halka aur sukoon wala music sunein", "Dhoop mein thora waqt guzarein"],
-        "affirmation": "Ye feeling temporary hai. Main har din behtar mehsoos karunga."
-    },
-    "Overwhelmed": {
-        "summary": "Zindagi ki zimmedariyan aur thoughts ka bojh barh gaya hai. It feels like too much to handle at once.",
-        "tips": ["Kaam ko chotay hisson mein baantein", "Extra zimmedariyon ko 'No' kahein", "15 minute screen break lein", "Neend puri karne ki koshish karein"],
-        "affirmation": "Ek waqt mein ek qadam uthana kafi hai."
-    },
-    "Calm": {
-        "summary": "Aapka emotional state filhal stable hai. Yeh behtareen waqt hai naye goals set karne ka.",
-        "tips": ["Apna routine jari rakhein", "Kisi ki madad karein", "Koi naya hobby shuru karein", "Apni kamyabiyon par ghaur karein"],
-        "affirmation": "Main apne aap aur duniya ke sath sukoon mein hoon."
+    "female": {
+        "teen": {
+            "Worry": {"summary": "Looks aur peer pressure teen girls ke liye baray masle hain.", "tips": ["Journaling shuru karein", "Positive affirmations parhein", "Social media ka use kam karein", "Apni pasand ka kaam karein"], "affirmation": "Main jesi hoon, behtareen hoon."},
+            "Mood Swings": {"summary": "Hormonal changes aur stress ki wajah se mood tezi se badalta hai.", "tips": ["Water intake barhayein", "Yoga ya stretching karein", "Proper rest lein", "Healthy diet rakhein"], "affirmation": "Main apne emotions ko control kar sakti hoon."}
+        },
+        "young": {
+            "Worry": {"summary": "Career aur marriage ka pressure is stage par boht hota hai.", "tips": ["Apne liye waqt nikalein", "Friends ke sath outitng pe jayein", "Skill development pe focus karein", "Pressure mein faisla na lein"], "affirmation": "Mera rasta mere liye behtareen hai."},
+            "Relationship Challenges": {"summary": "Expectations aur boundaries ka masla.", "tips": ["Dil ki baat saaf karein", "Toxic logon se door rahein", "Self-respect pe compromise na karein", "Counseling lein agar zaroorat ho"], "affirmation": "Main sukoon aur khushi ki qabil hoon."}
+        }
     }
+}
+
+# Generic Fallback for missing combos
+GENERIC_FALLBACK = {
+    "Worry": {"summary": "General anxiety aur fikar ka ehsas.", "tips": ["Gheri saans lein", "Paani piyein", "Fikar ko likh lein", "Walking karein"], "affirmation": "Main mehfooz hoon."},
+    "Feeling Low": {"summary": "Udasi aur thakawat ka ehsas.", "tips": ["Rest karein", "Music sunein", "Dost se baat karein", "Nahayein"], "affirmation": "Ye waqt bhi guzar jayega."},
+    "Overwhelmed": {"summary": "Kaam aur thoughts ka bojh.", "tips": ["Break lein", "To-do list banayein", "No kahein", "Deep breath"], "affirmation": "Ek qadam kafi hai."},
+    "Calm": {"summary": "Sukoon aur itminan ka ehsas.", "tips": ["Shukar ada karein", "Naya goal banayein", "Madad karein", "Smile"], "affirmation": "Main khush hoon."}
 }
 
 # ─── Data Logging (SQLite) ──────────────────────────────────────────────────
@@ -272,13 +285,15 @@ Respond ONLY with this JSON format:
         elif any(w in lower_text for w in ["sad", "low", "mayus", "dukh", "depressed"]): category = "Feeling Low"
         elif any(w in lower_text for w in ["burden", "pressure", "bojh", "overwhelmed"]): category = "Overwhelmed"
         
-        fb = FALLBACK_RESOURCES.get(category, FALLBACK_RESOURCES["Calm"])
+        fb = FALLBACK_RESOURCES.get(gender, {}).get(age, {}).get(category)
+        if not fb:
+            fb = GENERIC_FALLBACK.get(category, GENERIC_FALLBACK["Calm"])
         
         return jsonify({
             "condition": category,
             "confidence": "Low (Offline Mode)",
             "posteriorProbs": {category: 100},
-            "summary": fb["summary"] + " (Note: Gemini API is currently unavailable, using local insights)",
+            "summary": fb["summary"] + " (Offline Analysis)",
             "tips": fb["tips"],
             "affirmation": fb["affirmation"],
             "isCrisis": False,
