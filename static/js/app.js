@@ -599,3 +599,61 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// ── Dashboard Logic ──
+let breakdownChart = null;
+
+async function toggleDashboard() {
+  const section = document.getElementById("dashboardSection");
+  if (!section) return;
+  const isHidden = section.style.display === "none";
+  
+  if (isHidden) {
+    document.getElementById("step1").style.display = "none";
+    document.getElementById("step2").style.display = "none";
+    document.getElementById("step3").style.display = "none";
+    section.style.display = "block";
+    await fetchStats();
+  } else {
+    section.style.display = "none";
+    document.getElementById("step1").style.display = "block"; 
+    updateStepper(1);
+  }
+}
+
+function renderChart(breakdown) {
+  const chartEl = document.getElementById('breakdownChart');
+  if (!chartEl) return;
+  
+  const ctx = chartEl.getContext('2d');
+  const labels = Object.keys(breakdown);
+  const values = Object.values(breakdown);
+  
+  if (breakdownChart) {
+    breakdownChart.destroy();
+  }
+  
+  breakdownChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: ['#6366f1', '#ec4899', '#8b5cf6', '#10b981', '#f59e0b', '#3b82f6'],
+        borderWidth: 0,
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#94a3b8', font: { family: 'Outfit', size: 12 }, padding: 20 }
+        }
+      },
+      cutout: '70%'
+    }
+  });
+}
+
