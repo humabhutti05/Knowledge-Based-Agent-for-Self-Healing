@@ -104,40 +104,35 @@ const GUIDED_QUESTIONS = {
       "Is social media making you feel less confident about yourself?",
       "Are you struggling with sleep because of late-night thoughts?",
       "Do you feel disconnected from your parents or siblings?",
-      "Are you worried about what you will do after finishing school?",
-      "Do you feel like your friends don't truly understand you?"
+      "Are you worried about what you will do after finishing school?"
     ],
     "young": [
       "Is career uncertainty or work pressure weighing you down?",
       "Do you feel lonely even when you are with other people?",
       "Are you struggling to balance your job with personal life?",
       "Do you feel constant pressure to achieve financial success?",
-      "Are relationship issues affecting your mental peace?",
-      "Do you find it hard to stay motivated for your goals?"
+      "Are relationship issues affecting your mental peace?"
     ],
     "adult": [
       "How is the balance between your job and family life right now?",
       "Are financial or professional responsibilities causing constant worry?",
       "Do you feel you have enough time for your own mental wellbeing?",
       "Are you worried about the future stability of your family?",
-      "Do you feel appreciated for the work you do at home and office?",
-      "Is physical health becoming a source of stress for you?"
+      "Do you feel appreciated for the work you do at home and office?"
     ],
     "mid": [
       "Are you experiencing stress regarding future stability or retirement?",
       "How are changes in your health or energy levels affecting you?",
       "Do you feel a sense of isolation or disconnect from younger generations?",
       "Are you worried about the health of your elderly parents or spouse?",
-      "Do you feel that you've achieved what you wanted in life?",
-      "Is the 'empty nest' feeling making you feel sad or purposeless?"
+      "Do you feel that you've achieved what you wanted in life?"
     ],
     "elderly": [
       "Are you feeling lonely or missing people who are no longer around?",
       "How is your physical health impacting your mood today?",
       "Do you find it difficult to find purpose in your daily activities?",
       "Do you feel like you are a burden to your family members?",
-      "Are memories of the past making you feel regretful or sad?",
-      "Are you worried about how your family will manage or what will happen to them after you are gone?"
+      "Are memories of the past making you feel regretful or sad?"
     ]
   },
   "female": {
@@ -146,40 +141,35 @@ const GUIDED_QUESTIONS = {
       "Is academic competition causing you constant anxiety?",
       "Do you feel like you have to hide your true feelings from friends?",
       "Are you experiencing mood swings that you can't explain?",
-      "Do you feel overwhelmed by the expectations of being 'perfect'?",
-      "Is social media pressure making you feel inadequate?"
+      "Do you feel overwhelmed by the expectations of being 'perfect'?"
     ],
     "young": [
       "Are you feeling burnt out from balancing career and home expectations?",
       "Do you feel anxious about your future life choices like marriage?",
       "Is the pressure to look or behave a certain way exhausting you?",
       "Do you feel you lack a strong emotional support system?",
-      "Are you finding it hard to set boundaries with people in your life?",
-      "Do you often feel like you're falling behind your peers' milestones?"
+      "Are you finding it hard to set boundaries with people in your life?"
     ],
     "adult": [
       "How is the weight of family responsibilities affecting your time?",
       "Do you feel overwhelmed by the 'invisible mental load' of daily life?",
       "Are you finding it hard to cope with workplace stress and home duties?",
       "Do you feel your personal needs are always last on the priority list?",
-      "Are you worried about the upbringing or future of your children?",
-      "Do you feel a loss of your own identity outside of being a mother/wife?"
+      "Are you worried about the upbringing or future of your children?"
     ],
     "mid": [
       "Are life transitions or empty-nest feelings causing you sadness?",
       "How are you coping with changes in your physical wellbeing (e.g. menopause)?",
       "Do you feel that your emotional needs are being met by those around you?",
       "Are you worried about your financial independence in the future?",
-      "Do you feel a sense of regret about things you couldn't do earlier?",
-      "Is the health of your partner or parents a constant source of worry?"
+      "Do you feel a sense of regret about things you couldn't do earlier?"
     ],
     "elderly": [
       "Do you often feel isolated or disconnected from your family?",
       "How do memories of the past affect your current emotional state?",
       "Are health concerns making it difficult for you to stay positive?",
       "Do you feel that your wisdom and presence are valued by others?",
-      "Are you afraid of the future or of losing your independence?",
-      "Do you worry about the future of your children or family and how they will cope without you?"
+      "Are you afraid of the future or of losing your independence?"
     ]
   }
 };
