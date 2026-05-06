@@ -63,6 +63,30 @@ AGE_LABELS = {
     "elderly": "Elderly (65+)"
 }
 
+# ─── Fallback Knowledge Base (When API Fails) ────────────────────────────────
+FALLBACK_RESOURCES = {
+    "Worry": {
+        "summary": "Aapka brain shayad kisi unwanted pressure ya uncertainty ki wajah se overdrive mein hai. Yeh aksar future ki fikar ki wajah se hota hai.",
+        "tips": ["Deep breathing exercises (5 mins)", "5-4-3-2-1 grounding technique", "Caffeine kam karein", "Apni fikron ko ek diary mein likhein"],
+        "affirmation": "Main mehfooz hoon, aur meri saans mere control mein hai."
+    },
+    "Feeling Low": {
+        "summary": "Emotional thakawat aur mayusi aapki energy drain kar rahi hai. Choti baaton par focus karna mushkil lag raha hai.",
+        "tips": ["Ek choti walk par jayein", "Kisi qareebi dost se baat karein", "Halka aur sukoon wala music sunein", "Dhoop mein thora waqt guzarein"],
+        "affirmation": "Ye feeling temporary hai. Main har din behtar mehsoos karunga."
+    },
+    "Overwhelmed": {
+        "summary": "Zindagi ki zimmedariyan aur thoughts ka bojh barh gaya hai. It feels like too much to handle at once.",
+        "tips": ["Kaam ko chotay hisson mein baantein", "Extra zimmedariyon ko 'No' kahein", "15 minute screen break lein", "Neend puri karne ki koshish karein"],
+        "affirmation": "Ek waqt mein ek qadam uthana kafi hai."
+    },
+    "Calm": {
+        "summary": "Aapka emotional state filhal stable hai. Yeh behtareen waqt hai naye goals set karne ka.",
+        "tips": ["Apna routine jari rakhein", "Kisi ki madad karein", "Koi naya hobby shuru karein", "Apni kamyabiyon par ghaur karein"],
+        "affirmation": "Main apne aap aur duniya ke sath sukoon mein hoon."
+    }
+}
+
 # ─── Data Logging (SQLite) ──────────────────────────────────────────────────
 DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'wellbeing.db')
 
@@ -233,23 +257,34 @@ Respond ONLY with this JSON format:
         
     except Exception as e:
         import traceback
-        with open("error.log", "w") as f:
-            f.write(str(e) + "\n")
+        error_msg = str(e)
+        with open("error.log", "a") as f: # Use append
+            f.write("\n" + "="*20 + "\n")
+            f.write(error_msg + "\n")
             f.write(traceback.format_exc() + "\n")
-            if 'raw_text' in locals():
-                f.write("\nRAW TEXT:\n" + raw_text)
-        print(f"Gemini API Error: {e}", flush=True)
-        # Fallback if Gemini fails
+        
+        print(f"Gemini API Error: {error_msg}", flush=True)
+        
+        # Determine likely fallback category from text (simple keyword matching)
+        lower_text = text.lower()
+        category = "Calm"
+        if any(w in lower_text for w in ["tension", "worry", "dar", "fikar", "anxious"]): category = "Worry"
+        elif any(w in lower_text for w in ["sad", "low", "mayus", "dukh", "depressed"]): category = "Feeling Low"
+        elif any(w in lower_text for w in ["burden", "pressure", "bojh", "overwhelmed"]): category = "Overwhelmed"
+        
+        fb = FALLBACK_RESOURCES.get(category, FALLBACK_RESOURCES["Calm"])
+        
         return jsonify({
-            "condition": "Calm",
-            "confidence": "Low",
-            "posteriorProbs": {"Calm": 100, "Worry": 0, "Feeling Low": 0},
-            "summary": "We couldn't connect right now, but please know you are heard.",
-            "tips": ["Take a deep breath", "Drink some water", "Rest your eyes", "Talk to a friend"],
-            "affirmation": "You are resilient.",
+            "condition": category,
+            "confidence": "Low (Offline Mode)",
+            "posteriorProbs": {category: 100},
+            "summary": fb["summary"] + " (Note: Gemini API is currently unavailable, using local insights)",
+            "tips": fb["tips"],
+            "affirmation": fb["affirmation"],
             "isCrisis": False,
             "gender": g_label,
-            "ageLabel": a_label
+            "ageLabel": a_label,
+            "error": "API_KEY_LEAKED" if "403" in error_msg else "SERVER_ERROR"
         })
 
 if __name__ == "__main__":
