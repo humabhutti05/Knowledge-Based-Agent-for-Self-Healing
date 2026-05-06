@@ -249,11 +249,40 @@ def get_stats():
         rows = cursor.fetchall()
         breakdown = {row[0]: row[1] for row in rows}
         
+        # Daily history (Last 7 days)
+        cursor.execute('''
+            SELECT date(timestamp) as day, COUNT(*) 
+            FROM assessments 
+            GROUP BY day 
+            ORDER BY day DESC 
+            LIMIT 7
+        ''')
+        history_rows = cursor.fetchall()
+        history = [{"date": row[0], "count": row[1]} for row in history_rows]
+        
+        # Recent assessments (Last 10)
+        cursor.execute('''
+            SELECT timestamp, gender, age, prediction, confidence 
+            FROM assessments 
+            ORDER BY timestamp DESC 
+            LIMIT 10
+        ''')
+        recent_rows = cursor.fetchall()
+        recent = [{
+            "time": row[0].split('T')[0], 
+            "gender": row[1], 
+            "age": row[2], 
+            "result": row[3], 
+            "conf": row[4]
+        } for row in recent_rows]
+        
         conn.close()
         return jsonify({
             "total": total,
             "today": today_count,
-            "breakdown": breakdown
+            "breakdown": breakdown,
+            "history": history[::-1],
+            "recent": recent
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500

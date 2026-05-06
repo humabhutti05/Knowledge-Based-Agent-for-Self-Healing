@@ -284,6 +284,34 @@ textarea:focus + .textarea-glow { opacity: 0.1; }
 
 .action-footer { display: flex; justify-content: flex-end; }
 .action-footer.dual { justify-content: space-between; }
+/* Stats Table Styles */
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+}
+
+.stats-table th {
+    text-align: left;
+    padding: 0.8rem;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border-glass);
+    font-weight: 500;
+}
+
+.stats-table td {
+    padding: 0.8rem;
+    color: var(--text-main);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.chart-label {
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
 /* Live Stats Ticker */
 .live-stats {
     display: flex;

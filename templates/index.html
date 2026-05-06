@@ -140,7 +140,31 @@
         </div>
 
         <div class="chart-container">
+          <p class="chart-label">Condition Breakdown</p>
           <canvas id="breakdownChart"></canvas>
+        </div>
+
+        <div class="chart-container" style="margin-top: 3rem;">
+          <p class="chart-label">Activity Trend (Last 7 Days)</p>
+          <canvas id="trendChart"></canvas>
+        </div>
+
+        <div class="table-container" style="margin-top: 3rem;">
+          <p class="chart-label">Recent Assessments Log</p>
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Gender</th>
+                <th>Age Group</th>
+                <th>Condition</th>
+                <th>Confidence</th>
+              </tr>
+            </thead>
+            <tbody id="recentLogBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
         </div>
       </section>
     </main>

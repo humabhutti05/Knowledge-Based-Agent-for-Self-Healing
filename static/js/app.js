@@ -205,6 +205,12 @@ async function fetchStats() {
     if (document.getElementById("breakdownChart")) {
       renderChart(data.breakdown);
     }
+    if (document.getElementById("trendChart")) {
+      renderTrendChart(data.history);
+    }
+    if (document.getElementById("recentLogBody")) {
+      populateRecentTable(data.recent);
+    }
   } catch (err) {
     console.error("Failed to fetch stats:", err);
   }
@@ -655,5 +661,62 @@ function renderChart(breakdown) {
       cutout: '70%'
     }
   });
+}
+
+let trendChart = null;
+
+function renderTrendChart(history) {
+  const chartEl = document.getElementById('trendChart');
+  if (!chartEl) return;
+  
+  const ctx = chartEl.getContext('2d');
+  const labels = history.map(h => h.date);
+  const values = history.map(h => h.count);
+  
+  if (trendChart) {
+    trendChart.destroy();
+  }
+  
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Assessments per Day',
+        data: values,
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+function populateRecentTable(recent) {
+  const body = document.getElementById("recentLogBody");
+  if (!body) return;
+  
+  body.innerHTML = recent.map(row => `
+    <tr>
+      <td>${row.time}</td>
+      <td style="text-transform: capitalize;">${row.gender}</td>
+      <td>${row.age}</td>
+      <td><span class="badge" style="background: rgba(99,102,241,0.1); color: var(--primary);">${row.result}</span></td>
+      <td>${row.conf}</td>
+    </tr>
+  `).join('');
 }
 
