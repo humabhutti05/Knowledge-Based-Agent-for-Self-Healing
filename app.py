@@ -5,6 +5,7 @@ import os
 import random
 import re
 import math
+import sqlite3
 import google.generativeai as genai
 
 # Configure Gemini — Load API key from .env file
@@ -62,36 +63,64 @@ AGE_LABELS = {
     "elderly": "Elderly (65+)"
 }
 
-# ─── Data Logging ───────────────────────────────────────────────────────────
-HISTORY_PATH = os.path.join(os.path.dirname(__file__), 'data', 'history.json')
+# ─── Data Logging (SQLite) ──────────────────────────────────────────────────
+DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'wellbeing.db')
+
+def init_db():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS assessments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT,
+                user_text TEXT,
+                gender TEXT,
+                age TEXT,
+                prediction TEXT,
+                confidence TEXT,
+                posterior_probs TEXT,
+                summary TEXT,
+                tips TEXT,
+                affirmation TEXT,
+                is_crisis INTEGER
+            )
+        ''')
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Database Init Error: {e}")
 
 def save_assessment(result, user_text):
     try:
         from datetime import datetime
-        log_entry = {
-            "timestamp": datetime.now().isoformat(),
-            "user_text": user_text,
-            "gender": result.get("gender"),
-            "age": result.get("ageLabel"),
-            "prediction": result.get("condition"),
-            "confidence": result.get("confidence"),
-            "posteriorProbs": result.get("posteriorProbs")
-        }
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
         
-        history = []
-        if os.path.exists(HISTORY_PATH):
-            try:
-                with open(HISTORY_PATH, 'r') as f:
-                    history = json.load(f)
-            except:
-                history = []
+        cursor.execute('''
+            INSERT INTO assessments (
+                timestamp, user_text, gender, age, prediction, 
+                confidence, posterior_probs, summary, tips, affirmation, is_crisis
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            datetime.now().isoformat(),
+            user_text,
+            result.get("gender"),
+            result.get("ageLabel"),
+            result.get("condition"),
+            result.get("confidence"),
+            json.dumps(result.get("posteriorProbs")),
+            result.get("summary"),
+            json.dumps(result.get("tips")),
+            result.get("affirmation"),
+            1 if result.get("isCrisis") else 0
+        ))
         
-        history.append(log_entry)
-        
-        with open(HISTORY_PATH, 'w') as f:
-            json.dump(history, f, indent=2)
+        conn.commit()
+        conn.close()
+        print("Data successfully saved to database.", flush=True)
     except Exception as e:
-        print(f"Error saving history: {e}")
+        print(f"Error saving to database: {e}")
 
 # client = anthropic.Anthropic()  # Removed Anthropic dependency
 
@@ -194,5 +223,6 @@ Respond ONLY with this JSON format:
         })
 
 if __name__ == "__main__":
+    init_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
