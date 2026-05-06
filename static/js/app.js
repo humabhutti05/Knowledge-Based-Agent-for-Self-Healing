@@ -661,47 +661,47 @@ function renderChart(breakdown) {
   });
 }
 
-let trendCharts = {};
 function renderTrendChart(history, canvasId = 'trendChart') {
   const chartEl = document.getElementById(canvasId);
   if (!chartEl) return;
   
   const ctx = chartEl.getContext('2d');
-  const labels = history.map(h => h.date);
-  const values = history.map(h => h.count);
+  const dates = history.map(h => h.date);
   
-  const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-  gradient.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
-  gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+  // Extract unique categories
+  const categories = ["Worry", "Feeling Low", "Overwhelmed", "Mood Swings", "Relationship Challenges", "Calm"];
+  const colors = {
+    "Worry": "#6366f1", "Feeling Low": "#ec4899", "Overwhelmed": "#8b5cf6", 
+    "Mood Swings": "#10b981", "Relationship Challenges": "#f59e0b", "Calm": "#3b82f6"
+  };
+
+  const datasets = categories.map(cat => ({
+    label: cat,
+    data: history.map(h => h.data[cat] || 0),
+    backgroundColor: colors[cat],
+    borderRadius: 4
+  }));
 
   if (trendCharts[canvasId]) {
     trendCharts[canvasId].destroy();
   }
   
   trendCharts[canvasId] = new Chart(ctx, {
-    type: 'line',
+    type: 'bar',
     data: {
-      labels: labels,
-      datasets: [{
-        label: 'Daily Tests',
-        data: values,
-        borderColor: '#818cf8',
-        backgroundColor: gradient,
-        borderWidth: 3,
-        pointBackgroundColor: '#fff',
-        fill: true,
-        tension: 0.4
-      }]
+      labels: dates,
+      datasets: datasets
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+        x: { stacked: true, grid: { display: false }, ticks: { color: '#94a3b8' } },
+        y: { stacked: true, beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', stepSize: 1 } }
       },
       plugins: {
-        legend: { display: false }
+        legend: { display: true, position: 'top', labels: { color: '#94a3b8', font: { size: 10 } } },
+        tooltip: { mode: 'index', intersect: false }
       }
     }
   });

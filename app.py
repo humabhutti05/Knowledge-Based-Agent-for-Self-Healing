@@ -249,17 +249,25 @@ def get_stats():
         rows = cursor.fetchall()
         breakdown = {row[0]: row[1] for row in rows}
         
-        # Daily history (Last 7 days)
+        # Daily history with categories (Last 7 days)
         cursor.execute('''
-            SELECT date(timestamp) as day, COUNT(*) 
+            SELECT date(timestamp) as day, prediction, COUNT(*) 
             FROM assessments 
-            GROUP BY day 
+            GROUP BY day, prediction 
             ORDER BY day DESC 
-            LIMIT 7
+            LIMIT 50
         ''')
         history_rows = cursor.fetchall()
-        history = [{"date": row[0], "count": row[1]} for row in history_rows]
         
+        # Organize into { "2026-05-06": { "Worry": 2, "Feeling Low": 1 }, ... }
+        history_map = {}
+        for row in history_rows:
+            day, cat, count = row
+            if day not in history_map: history_map[day] = {}
+            history_map[day][cat] = count
+            
+        history_list = [{"date": d, "data": v} for d, v in history_map.items()]
+
         # Recent assessments (Last 10)
         cursor.execute('''
             SELECT timestamp, gender, age, prediction, confidence 
@@ -281,7 +289,7 @@ def get_stats():
             "total": total,
             "today": today_count,
             "breakdown": breakdown,
-            "history": history[::-1],
+            "history": history_list[::-1],
             "recent": recent
         })
     except Exception as e:
