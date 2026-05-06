@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Self HealUp — Premium AI Wellbeing Agent</title>
   <link rel="stylesheet" href="/static/css/style.css"/>
+  <link rel="stylesheet" href="/static/css/dashboard.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -121,52 +122,71 @@
           <button class="btn ghost-btn" onclick="reset()" style="margin-top:0; ">New</button>
         </div>
       </section>
-      <!-- DASHBOARD: Stats -->
-      <section class="card glass" id="dashboardSection" style="display:none">
+    <!-- Premium Analytics Dashboard Overlay -->
+    <div id="dashboardOverlay" class="dashboard-overlay">
+      <div class="dashboard-container">
         <div class="dashboard-header">
-          <h2 class="card-title">Wellbeing Analytics</h2>
-          <button class="btn-close" onclick="toggleDashboard()">×</button>
-        </div>
-        
-        <div class="stats-grid">
-          <div class="stat-item">
-            <span class="stat-value" id="totalStats">0</span>
-            <span class="stat-label">Total Tests</span>
+          <div>
+            <h2>Wellbeing Analytics</h2>
+            <p style="color: var(--text-dim); margin-top: 0.5rem;">Comprehensive insights into emotional health trends.</p>
           </div>
-          <div class="stat-item highlight">
-            <span class="stat-value" id="todayStats">0</span>
-            <span class="stat-label">Done Today</span>
+          <button class="close-dashboard" onclick="toggleDashboard()">✕</button>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <h4>Total Assessments</h4>
+            <div class="value" id="totalStats">0</div>
+          </div>
+          <div class="stat-card">
+            <h4>Today's Activity</h4>
+            <div class="value" id="todayStats">0</div>
+          </div>
+          <div class="stat-card">
+            <h4>System Status</h4>
+            <div class="value" style="font-size: 1.5rem; color: #10b981;">Online</div>
           </div>
         </div>
 
-        <div class="chart-container">
-          <p class="chart-label">Condition Breakdown</p>
-          <canvas id="breakdownChart"></canvas>
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>📈 Condition Distribution</h3>
+            <div style="height: 300px; position: relative;">
+              <canvas id="breakdownChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h3>📊 Activity Trend (Last 7 Days)</h3>
+            <div style="height: 300px; position: relative;">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </div>
         </div>
 
-        <div class="chart-container" style="margin-top: 3rem;">
-          <p class="chart-label">Activity Trend (Last 7 Days)</p>
-          <canvas id="trendChart"></canvas>
+        <div class="history-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="color: white; margin: 0;">Detailed Assessment Log</h3>
+            <span class="badge" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">Last 10 Entries</span>
+          </div>
+          <div class="table-responsive">
+            <table class="premium-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Gender</th>
+                  <th>Age</th>
+                  <th>Classification</th>
+                  <th>Confidence</th>
+                </tr>
+              </thead>
+              <tbody id="recentLogBody">
+                <!-- Data injected here -->
+              </tbody>
+            </table>
+          </div>
         </div>
-
-        <div class="table-container" style="margin-top: 3rem;">
-          <p class="chart-label">Recent Assessments Log</p>
-          <table class="stats-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Gender</th>
-                <th>Age Group</th>
-                <th>Condition</th>
-                <th>Confidence</th>
-              </tr>
-            </thead>
-            <tbody id="recentLogBody">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
-        </div>
-      </section>
+      </div>
+    </div>
     </main>
 
     <footer class="app-footer">

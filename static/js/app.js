@@ -609,20 +609,15 @@ document.addEventListener("keydown", (e) => {
 let breakdownChart = null;
 
 async function toggleDashboard() {
-  const section = document.getElementById("dashboardSection");
-  if (!section) return;
-  const isHidden = section.style.display === "none";
+  const overlay = document.getElementById("dashboardOverlay");
+  if (!overlay) return;
+  const isHidden = overlay.style.display === "none" || overlay.style.display === "";
   
   if (isHidden) {
-    document.getElementById("step1").style.display = "none";
-    document.getElementById("step2").style.display = "none";
-    document.getElementById("step3").style.display = "none";
-    section.style.display = "block";
+    overlay.style.display = "block";
     await fetchStats();
   } else {
-    section.style.display = "none";
-    document.getElementById("step1").style.display = "block"; 
-    updateStepper(1);
+    overlay.style.display = "none";
   }
 }
 
@@ -646,7 +641,7 @@ function renderChart(breakdown) {
         data: values,
         backgroundColor: ['#6366f1', '#ec4899', '#8b5cf6', '#10b981', '#f59e0b', '#3b82f6'],
         borderWidth: 0,
-        hoverOffset: 10
+        hoverOffset: 15
       }]
     },
     options: {
@@ -655,10 +650,10 @@ function renderChart(breakdown) {
       plugins: {
         legend: {
           position: 'bottom',
-          labels: { color: '#94a3b8', font: { family: 'Outfit', size: 12 }, padding: 20 }
+          labels: { color: '#94a3b8', font: { family: 'Outfit', size: 11 }, padding: 15 }
         }
       },
-      cutout: '70%'
+      cutout: '75%'
     }
   });
 }
@@ -673,6 +668,10 @@ function renderTrendChart(history) {
   const labels = history.map(h => h.date);
   const values = history.map(h => h.count);
   
+  const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+  gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
+  gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
+
   if (trendChart) {
     trendChart.destroy();
   }
@@ -682,11 +681,14 @@ function renderTrendChart(history) {
     data: {
       labels: labels,
       datasets: [{
-        label: 'Assessments per Day',
+        label: 'Assessments',
         data: values,
-        borderColor: '#6366f1',
-        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-        borderWidth: 3,
+        borderColor: '#818cf8',
+        backgroundColor: gradient,
+        borderWidth: 4,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: '#818cf8',
+        pointHoverRadius: 6,
         fill: true,
         tension: 0.4
       }]
@@ -695,11 +697,18 @@ function renderTrendChart(history) {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', stepSize: 1 } },
         x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
       },
       plugins: {
-        legend: { display: false }
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e1b4b',
+          titleFont: { family: 'Outfit' },
+          bodyFont: { family: 'Outfit' },
+          padding: 12,
+          displayColors: false
+        }
       }
     }
   });
@@ -714,8 +723,8 @@ function populateRecentTable(recent) {
       <td>${row.time}</td>
       <td style="text-transform: capitalize;">${row.gender}</td>
       <td>${row.age}</td>
-      <td><span class="badge" style="background: rgba(99,102,241,0.1); color: var(--primary);">${row.result}</span></td>
-      <td>${row.conf}</td>
+      <td><span class="badge" style="background: rgba(99,102,241,0.1); color: #818cf8; border: none; padding: 4px 10px;">${row.result}</span></td>
+      <td><span style="color: #10b981;">●</span> ${row.conf}</td>
     </tr>
   `).join('');
 }
