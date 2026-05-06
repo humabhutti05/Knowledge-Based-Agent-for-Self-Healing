@@ -205,8 +205,11 @@ async function fetchStats() {
     if (document.getElementById("breakdownChart")) {
       renderChart(data.breakdown);
     }
-    if (document.getElementById("trendChart")) {
-      renderTrendChart(data.history);
+    if (document.getElementById("mainTrendChart")) {
+      renderTrendChart(data.history, "mainTrendChart");
+    }
+    if (document.getElementById("mainBarChart")) {
+      renderBarChart(data.breakdown, "mainBarChart");
     }
     if (document.getElementById("recentLogBody")) {
       populateRecentTable(data.recent);
@@ -658,37 +661,34 @@ function renderChart(breakdown) {
   });
 }
 
-let trendChart = null;
-
-function renderTrendChart(history) {
-  const chartEl = document.getElementById('trendChart');
+let trendCharts = {};
+function renderTrendChart(history, canvasId = 'trendChart') {
+  const chartEl = document.getElementById(canvasId);
   if (!chartEl) return;
   
   const ctx = chartEl.getContext('2d');
   const labels = history.map(h => h.date);
   const values = history.map(h => h.count);
   
-  const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-  gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
+  const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+  gradient.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
   gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
 
-  if (trendChart) {
-    trendChart.destroy();
+  if (trendCharts[canvasId]) {
+    trendCharts[canvasId].destroy();
   }
   
-  trendChart = new Chart(ctx, {
+  trendCharts[canvasId] = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
       datasets: [{
-        label: 'Assessments',
+        label: 'Daily Tests',
         data: values,
         borderColor: '#818cf8',
         backgroundColor: gradient,
-        borderWidth: 4,
+        borderWidth: 3,
         pointBackgroundColor: '#fff',
-        pointBorderColor: '#818cf8',
-        pointHoverRadius: 6,
         fill: true,
         tension: 0.4
       }]
@@ -697,18 +697,49 @@ function renderTrendChart(history) {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', stepSize: 1 } },
+        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
         x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
       },
       plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1e1b4b',
-          titleFont: { family: 'Outfit' },
-          bodyFont: { family: 'Outfit' },
-          padding: 12,
-          displayColors: false
-        }
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+let barCharts = {};
+function renderBarChart(breakdown, canvasId = 'mainBarChart') {
+  const chartEl = document.getElementById(canvasId);
+  if (!chartEl) return;
+  
+  const ctx = chartEl.getContext('2d');
+  const labels = Object.keys(breakdown);
+  const values = Object.values(breakdown);
+  
+  if (barCharts[canvasId]) {
+    barCharts[canvasId].destroy();
+  }
+  
+  barCharts[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: '#6366f1',
+        borderRadius: 8,
+        barThickness: 20
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+      },
+      plugins: {
+        legend: { display: false }
       }
     }
   });
