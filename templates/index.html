@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/static/css/style.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="glow-bg">
@@ -16,9 +17,12 @@
 
   <div class="app-container">
     <header class="app-header">
-      <div class="logo">
-        <span class="logo-icon"></span>
-        <h1>Self HealUp <span class="badge">AI</span></h1>
+      <div class="header-top">
+        <div class="logo">
+          <span class="logo-icon"></span>
+          <h1>Self HealUp <span class="badge">AI</span></h1>
+        </div>
+        <button class="btn ghost-btn small" onclick="toggleDashboard()">Insights Dashboard</button>
       </div>
       <p class="subtitle">Advanced Neural Wellbeing Inference · Powered by 53K Data Points</p>
     </header>
@@ -109,6 +113,28 @@
         <div class="action-footer dual" style="margin-top: 2rem;">
           <button class="btn secondary" onclick="goStep2FromStep3()">Edit</button>
           <button class="btn ghost-btn" onclick="reset()" style="margin-top:0; ">New</button>
+        </div>
+      </section>
+      <!-- DASHBOARD: Stats -->
+      <section class="card glass" id="dashboardSection" style="display:none">
+        <div class="dashboard-header">
+          <h2 class="card-title">Wellbeing Analytics</h2>
+          <button class="btn-close" onclick="toggleDashboard()">×</button>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-value" id="totalStats">0</span>
+            <span class="stat-label">Total Tests</span>
+          </div>
+          <div class="stat-item highlight">
+            <span class="stat-value" id="todayStats">0</span>
+            <span class="stat-label">Done Today</span>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="breakdownChart"></canvas>
         </div>
       </section>
     </main>

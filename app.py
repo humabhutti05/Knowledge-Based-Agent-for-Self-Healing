@@ -124,6 +124,36 @@ def save_assessment(result, user_text):
 
 # client = anthropic.Anthropic()  # Removed Anthropic dependency
 
+@app.route("/api/stats", methods=["GET"])
+def get_stats():
+    try:
+        from datetime import datetime
+        today = datetime.now().strftime('%Y-%m-%d')
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        # Total count
+        cursor.execute('SELECT COUNT(*) FROM assessments')
+        total = cursor.fetchone()[0]
+        
+        # Today's count
+        cursor.execute("SELECT COUNT(*) FROM assessments WHERE timestamp LIKE ?", (f'{today}%',))
+        today_count = cursor.fetchone()[0]
+        
+        # Category breakdown
+        cursor.execute('SELECT prediction, COUNT(*) FROM assessments GROUP BY prediction')
+        rows = cursor.fetchall()
+        breakdown = {row[0]: row[1] for row in rows}
+        
+        conn.close()
+        return jsonify({
+            "total": total,
+            "today": today_count,
+            "breakdown": breakdown
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/")
 def index():
     return render_template("index.html")
