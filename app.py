@@ -123,25 +123,29 @@ def analyze():
 
     # ─── Gemini Inference Logic ────────────────────────────────────────────────
     prompt = f"""
-Analyze the feelings of a {g_label} ({a_label}) who said: "{text}"
+You are a highly empathetic and professional Wellbeing Guide. 
+Analyze the feelings of a {g_label} ({a_label}) who expressed: "{text}"
 
-Pay special attention to frequency keywords like "sometimes", "usually", "daily", "all the time", or numerical values (e.g. 50-60%) if provided. Use these to adjust the intensities of the categories and your confidence level.
+Guidelines for analysis:
+1. Frequency/Intensity: Pay attention to words like "hamesha", "kabhi kabhi", "rozana", "daily", or any percentages mentioned.
+2. Categories: Worry, Feeling Low, Overwhelmed, Mood Swings, Relationship Challenges, Calm.
+3. Language: If the user input is in Roman Urdu, the summary and tips should be primarily in Roman Urdu. If in English, use English.
 
-Identify the intensities for these categories: Worry, Feeling Low, Overwhelmed, Mood Swings, Relationship Challenges, Calm.
-The total sum of probabilities MUST be 100.
+CRITICAL: The "tips" must be:
+- "Acha or Bht Acha": High quality, practical, and non-generic.
+- "Unique": Do NOT give basic advice like "rest" or "drink water". Give 4 specific, actionable, and deep suggestions tailored for a {a_label} {g_label}.
+- "Personalized": Directly address the nuance of what they said.
 
 Respond ONLY with this JSON format:
 {{
-  "condition": "Primary Feeling Name",
+  "condition": "Primary Emotional State",
   "confidence": "High/Medium/Low",
   "posteriorProbs": {{
-    "Worry": 15,
-    "Feeling Low": 10,
-    ... (all 6 categories summing to 100)
+    "Worry": 0, "Feeling Low": 0, "Overwhelmed": 0, "Mood Swings": 0, "Relationship Challenges": 0, "Calm": 0
   }},
-  "summary": "2 sentences in user's language (Roman Urdu/English) explaining why they feel this way.",
+  "summary": "2-3 empathetic sentences in the user's language.",
   "tips": ["Tip 1", "Tip 2", "Tip 3", "Tip 4"],
-  "affirmation": "Short positive sentence.",
+  "affirmation": "A short, powerful affirmation.",
   "isCrisis": false
 }}
 """
@@ -190,4 +194,5 @@ Respond ONLY with this JSON format:
         })
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
