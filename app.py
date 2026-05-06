@@ -289,29 +289,30 @@ def analyze():
     
     # ─── Gemini Inference Logic (Optional Enhancement) ──────────────────────
     prompt = f"""
-You are a highly empathetic and professional Wellbeing Guide. 
+You are a world-class, empathetic Wellbeing Specialist. 
 Analyze the feelings of a {g_label} ({a_label}) who expressed: "{text}"
 
-Guidelines for analysis:
-1. Frequency/Intensity: Pay attention to words like "hamesha", "kabhi kabhi", "rozana", "daily", or any percentages mentioned.
-2. Categories: Worry, Feeling Low, Overwhelmed, Mood Swings, Relationship Challenges, Calm.
-3. Language: Respond STRICTLY in English only. Do not use Roman Urdu even if the user input is in Roman Urdu.
-
-CRITICAL: The "tips" must be:
-- "Acha or Bht Acha": High quality, practical, and non-generic.
-- "Unique": Do NOT give basic advice like "rest" or "drink water". Give 4 specific, actionable, and deep suggestions tailored for a {a_label} {g_label}.
-- "Personalized": Directly address the nuance of what they said.
+CRITICAL INSTRUCTIONS for your response:
+1. "Justified Advice": For every tip, explain briefly WHY it is relevant to a {a_label} {g_label} in this specific emotional state.
+2. "Zero Clichés": Do NOT use generic advice like "stay positive", "breathe", or "drink water". Provide deep, actionable, and sophisticated psychological or lifestyle insights.
+3. "Demographic Specificity": The advice must feel like it was written ONLY for a {a_label} {g_label}.
+4. "Language": Respond STRICTLY in English.
 
 Respond ONLY with this JSON format:
 {{
-  "condition": "Primary Emotional State",
+  "condition": "Sophisticated Emotional State Name",
   "confidence": "High/Medium/Low",
   "posteriorProbs": {{
     "Worry": 0, "Feeling Low": 0, "Overwhelmed": 0, "Mood Swings": 0, "Relationship Challenges": 0, "Calm": 0
   }},
-  "summary": "2-3 empathetic sentences in the user's language.",
-  "tips": ["Tip 1", "Tip 2", "Tip 3", "Tip 4"],
-  "affirmation": "A short, powerful affirmation.",
+  "summary": "3-4 sentences of deep, empathetic psychological insight into their state.",
+  "tips": [
+    "Justified Tip 1: [Action] because [Reasoning for {a_label} {g_label}]",
+    "Justified Tip 2: [Action] because [Reasoning for {a_label} {g_label}]",
+    "Justified Tip 3: [Action] because [Reasoning for {a_label} {g_label}]",
+    "Justified Tip 4: [Action] because [Reasoning for {a_label} {g_label}]"
+  ],
+  "affirmation": "A powerful, non-generic affirmation.",
   "isCrisis": false
 }}
 """

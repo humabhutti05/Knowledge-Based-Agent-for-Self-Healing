@@ -185,6 +185,31 @@ const GUIDED_QUESTIONS = {
 };
 
 // ── Initialization ──
+async function fetchStats() {
+  try {
+    const res = await fetch('/api/stats');
+    const data = await res.json();
+    
+    // Update live ticker in header
+    document.getElementById("liveTotal").textContent = data.total || 0;
+    document.getElementById("liveToday").textContent = data.today || 0;
+
+    // Update dashboard items if visible
+    if (document.getElementById("totalStats")) {
+      document.getElementById("totalStats").textContent = data.total || 0;
+    }
+    if (document.getElementById("todayStats")) {
+      document.getElementById("todayStats").textContent = data.today || 0;
+    }
+    
+    if (document.getElementById("breakdownChart")) {
+      renderChart(data.breakdown);
+    }
+  } catch (err) {
+    console.error("Failed to fetch stats:", err);
+  }
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     const res = await fetch("data/model.json");
@@ -193,6 +218,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     console.error("Failed to load model:", err);
   }
+  
+  // Call stats fetch
+  fetchStats();
 });
 
 // ── Selectors ──

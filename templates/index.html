@@ -21,8 +21,14 @@
         <div class="logo">
           <span class="logo-icon"></span>
           <h1>Self HealUp <span class="badge">AI</span></h1>
+          <div class="live-stats">
+            <span class="dot pulse"></span>
+            <span id="liveTotal">0</span> Total · <span id="liveToday">0</span> Today
+          </div>
         </div>
-        <button class="btn ghost-btn small" onclick="toggleDashboard()">Insights Dashboard</button>
+        <button class="btn dashboard-btn" onclick="toggleDashboard()">
+          <span class="icon">📊</span> Insights Dashboard
+        </button>
       </div>
       <p class="subtitle">Advanced Neural Wellbeing Inference · Powered by 53K Data Points</p>
     </header>
