@@ -76,37 +76,37 @@ AGE_LABELS = {
 FALLBACK_RESOURCES = {
     "male": {
         "teen": {
-            "Worry": {"summary": "Study pressure aur social acceptance ka bojh teen boys par kaafi hota hai.", "tips": ["Study sessions ke beech 15 min break lein", "Physical activity (football/gym) shuru karein", "Caffeine kam karein", "Apne kisi dost se dil ki baat karein"], "affirmation": "Main apni mehnat se har mushkil paar kar sakta hoon."},
-            "Feeling Low": {"summary": "Aksar is umer mein akelapan aur doston ki kami mehsoos hoti hai.", "tips": ["Screen time kam karein", "Subah ki dhoop mein 10 min guzarein", "Apna pasandida music sunein", "Family ke sath thora waqt bitayein"], "affirmation": "Har din ek naya mouqa hai behtar banne ka."},
-            "Overwhelmed": {"summary": "Boht sari umeedon aur future ki fikar ka bojh.", "tips": ["Ek waqt mein ek kaam karein", "Bari cheezon ko chotay hisson mein divide karein", "Gheri saans lein", "Social media se break lein"], "affirmation": "Main kafi hoon aur main handle kar sakta hoon."}
+            "Worry": {"summary": "Academic pressure and social acceptance can be heavy for teen boys.", "tips": ["Take 15-min breaks between study sessions", "Start a physical activity (football/gym)", "Reduce caffeine intake", "Talk to a trusted friend about your feelings"], "affirmation": "I can overcome any challenge with consistent effort."},
+            "Feeling Low": {"summary": "Isolation and a lack of close friends are common at this stage.", "tips": ["Reduce screen time", "Spend 10 mins in morning sunlight", "Listen to uplifting music", "Spend more quality time with family"], "affirmation": "Every day is a new opportunity to feel better."},
+            "Overwhelmed": {"summary": "High expectations and future-related anxiety are causing stress.", "tips": ["Focus on one task at a time", "Break large goals into smaller steps", "Practice deep breathing", "Take a break from social media"], "affirmation": "I am enough, and I can handle what comes my way."}
         },
         "young": {
-            "Worry": {"summary": "Career aur financial stability ki fikar is umer mein aam hai.", "tips": ["Monthly budget banayein", "Apne career goals ko likh lein", "7-8 ghante ki neend puri karein", "Work-life balance banayein"], "affirmation": "Meri mehnat rang layegi."},
-            "Relationship Challenges": {"summary": "Commitments aur social life ka balance mushkil lag sakta hai.", "tips": ["Clear communication rakhein", "Healthy boundaries set karein", "Self-care ko priority dein", "Gusso par control rakhein"], "affirmation": "Main izzat aur mohabbat ke qabil hoon."}
+            "Worry": {"summary": "Concerns about career and financial stability are common in your 20s.", "tips": ["Create a monthly budget", "Write down your career goals", "Get 7-8 hours of sleep", "Maintain a healthy work-life balance"], "affirmation": "My hard work will eventually pay off."},
+            "Relationship Challenges": {"summary": "Balancing commitments and social life can feel demanding.", "tips": ["Maintain clear communication", "Set healthy personal boundaries", "Prioritize self-care", "Manage your reactions and anger"], "affirmation": "I am worthy of respect and love."}
         },
         "adult": {
-            "Overwhelmed": {"summary": "Ghar aur office ki zimmedariyan thaka deti hain.", "tips": ["Family ke sath quality time guzarein", "Hobby ke liye waqt nikalein", "Meditation shuru karein", "Zimmedariyan share karein"], "affirmation": "Main apne khandan ki taqat hoon."},
-            "Worry": {"summary": "Bacho ka mustaqbil aur sehat ki fikar.", "tips": ["Bacho ke sath khelein", "Financial planning karein", "Healthy lifestyle apnaein", "Tension kam lein"], "affirmation": "Sab theek ho jayega."}
+            "Overwhelmed": {"summary": "Balancing home and office responsibilities can be exhausting.", "tips": ["Spend quality time with your family", "Make time for a personal hobby", "Start a daily meditation practice", "Share responsibilities with others"], "affirmation": "I am the strength of my family."},
+            "Worry": {"summary": "Concerns regarding children's future and overall health.", "tips": ["Spend playful time with your children", "Engage in financial planning", "Adopt a healthier lifestyle", "Try to reduce mental tension"], "affirmation": "Everything will turn out fine."}
         }
     },
     "female": {
         "teen": {
-            "Worry": {"summary": "Looks aur peer pressure teen girls ke liye baray masle hain.", "tips": ["Journaling shuru karein", "Positive affirmations parhein", "Social media ka use kam karein", "Apni pasand ka kaam karein"], "affirmation": "Main jesi hoon, behtareen hoon."},
-            "Mood Swings": {"summary": "Hormonal changes aur stress ki wajah se mood tezi se badalta hai.", "tips": ["Water intake barhayein", "Yoga ya stretching karein", "Proper rest lein", "Healthy diet rakhein"], "affirmation": "Main apne emotions ko control kar sakti hoon."}
+            "Worry": {"summary": "Appearance and peer pressure are significant issues for teen girls.", "tips": ["Start daily journaling", "Read positive affirmations", "Reduce social media usage", "Engage in an activity you love"], "affirmation": "I am wonderful just the way I am."},
+            "Mood Swings": {"summary": "Hormonal changes and stress can cause rapid emotional shifts.", "tips": ["Increase your water intake", "Practice yoga or stretching", "Ensure you get proper rest", "Maintain a healthy, balanced diet"], "affirmation": "I am in control of my emotions."}
         },
         "young": {
-            "Worry": {"summary": "Career aur marriage ka pressure is stage par boht hota hai.", "tips": ["Apne liye waqt nikalein", "Friends ke sath outitng pe jayein", "Skill development pe focus karein", "Pressure mein faisla na lein"], "affirmation": "Mera rasta mere liye behtareen hai."},
-            "Relationship Challenges": {"summary": "Expectations aur boundaries ka masla.", "tips": ["Dil ki baat saaf karein", "Toxic logon se door rahein", "Self-respect pe compromise na karein", "Counseling lein agar zaroorat ho"], "affirmation": "Main sukoon aur khushi ki qabil hoon."}
+            "Worry": {"summary": "Career and marriage pressures are often high at this stage.", "tips": ["Make dedicated time for yourself", "Go out with friends for a change", "Focus on personal skill development", "Avoid making major decisions under pressure"], "affirmation": "My path is unique and perfect for me."},
+            "Relationship Challenges": {"summary": "Navigating expectations and setting personal boundaries.", "tips": ["Communicate your feelings clearly", "Keep a distance from toxic influences", "Do not compromise on self-respect", "Seek professional counseling if needed"], "affirmation": "I deserve peace and happiness."}
         }
     }
 }
 
 # Generic Fallback for missing combos
 GENERIC_FALLBACK = {
-    "Worry": {"summary": "General anxiety aur fikar ka ehsas.", "tips": ["Gheri saans lein", "Paani piyein", "Fikar ko likh lein", "Walking karein"], "affirmation": "Main mehfooz hoon."},
-    "Feeling Low": {"summary": "Udasi aur thakawat ka ehsas.", "tips": ["Rest karein", "Music sunein", "Dost se baat karein", "Nahayein"], "affirmation": "Ye waqt bhi guzar jayega."},
-    "Overwhelmed": {"summary": "Kaam aur thoughts ka bojh.", "tips": ["Break lein", "To-do list banayein", "No kahein", "Deep breath"], "affirmation": "Ek qadam kafi hai."},
-    "Calm": {"summary": "Sukoon aur itminan ka ehsas.", "tips": ["Shukar ada karein", "Naya goal banayein", "Madad karein", "Smile"], "affirmation": "Main khush hoon."}
+    "Worry": {"summary": "Feelings of general anxiety and concern.", "tips": ["Take deep breaths", "Drink plenty of water", "Write down your worries", "Go for a short walk"], "affirmation": "I am safe and secure."},
+    "Feeling Low": {"summary": "Feelings of sadness and exhaustion.", "tips": ["Take some rest", "Listen to soothing music", "Talk to a friend", "Take a refreshing shower"], "affirmation": "This moment will also pass."},
+    "Overwhelmed": {"summary": "A heavy burden of work and repetitive thoughts.", "tips": ["Take a break", "Create a structured to-do list", "Learn to say no", "Practice deep breathing"], "affirmation": "One small step is enough for now."},
+    "Calm": {"summary": "A sense of peace and satisfaction.", "tips": ["Practice gratitude", "Set a new positive goal", "Help someone else", "Remember to smile"], "affirmation": "I am happy and at peace."}
 }
 
 # ─── KRR Ontology: Classes & Relationships ──────────────────────────────────
@@ -295,7 +295,7 @@ Analyze the feelings of a {g_label} ({a_label}) who expressed: "{text}"
 Guidelines for analysis:
 1. Frequency/Intensity: Pay attention to words like "hamesha", "kabhi kabhi", "rozana", "daily", or any percentages mentioned.
 2. Categories: Worry, Feeling Low, Overwhelmed, Mood Swings, Relationship Challenges, Calm.
-3. Language: If the user input is in Roman Urdu, the summary and tips should be primarily in Roman Urdu. If in English, use English.
+3. Language: Respond STRICTLY in English only. Do not use Roman Urdu even if the user input is in Roman Urdu.
 
 CRITICAL: The "tips" must be:
 - "Acha or Bht Acha": High quality, practical, and non-generic.

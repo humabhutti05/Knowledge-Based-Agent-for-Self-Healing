@@ -26,32 +26,32 @@ const CLASS_MAPPING = {
 
 const STATIC_SUGGESTIONS = {
   "Worry": {
-    summary: "Aapka brain shayad kisi unwanted pressure ya uncertainty ki wajah se overdrive mein hai. Yeh aksar future ki fikar ki wajah se hota hai.",
+    summary: "Your brain might be in overdrive due to unwanted pressure or uncertainty, often caused by worrying about the future.",
     tips: ["Deep breathing exercises", "5-4-3-2-1 grounding technique", "Limit caffeine intake", "Write down your worries"],
     affirmation: "I am safe, and I am in control of my breath."
   },
   "Feeling Low": {
-    summary: "Emotional thakawat aur mayusi aapki energy drain kar rahi hai. Choti baaton par focus karna mushkil lag raha hai.",
+    summary: "Emotional exhaustion and a sense of hopelessness are draining your energy, making it hard to focus on small tasks.",
     tips: ["Go for a short walk", "Talk to a trusted friend", "Listen to uplifting music", "Sunlight exposure"],
     affirmation: "This feeling is temporary. I am growing stronger each day."
   },
   "Overwhelmed": {
-    summary: "Zindagi ki zimmedariyan aur thoughts ka bojh barh gaya hai. It feels like too much to handle at once.",
+    summary: "Life's responsibilities and the weight of your thoughts have increased. It feels like too much to handle at once.",
     tips: ["Break tasks into small steps", "Say no to extra commitments", "Take a 15-minute screen break", "Prioritize sleep"],
     affirmation: "One step at a time is enough."
   },
   "Mood Swings": {
-    summary: "Aapke emotions tezi se badal rahe hain, jo energy aur focus dono ko affect kar raha hai.",
+    summary: "Your emotions are changing rapidly, which is affecting both your energy levels and your focus.",
     tips: ["Keep a mood journal", "Maintain a regular sleep cycle", "Avoid emotional triggers", "Practice mindfulness"],
     affirmation: "I embrace my emotions without letting them drive me."
   },
   "Relationship Challenges": {
-    summary: "Social interactions aur personal connections mein thori kashmakash mehsoos ho rahi hai.",
+    summary: "You are experiencing some tension or difficulty in your social interactions and personal connections.",
     tips: ["Set healthy boundaries", "Practice active listening", "Focus on self-care", "Express feelings clearly"],
     affirmation: "I deserve healthy and meaningful connections."
   },
   "Calm": {
-    summary: "Aapka emotional state stable hai. Yeh behtareen waqt hai naye goals set karne ka.",
+    summary: "Your emotional state is currently stable. This is a great time to set new positive goals for yourself.",
     tips: ["Continue your routine", "Help someone else", "Try a new hobby", "Reflect on your progress"],
     affirmation: "I am at peace with myself and the world."
   }
