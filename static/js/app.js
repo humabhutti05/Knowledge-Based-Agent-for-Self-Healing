@@ -137,7 +137,7 @@ const GUIDED_QUESTIONS = {
       "Do you find it difficult to find purpose in your daily activities?",
       "Do you feel like you are a burden to your family members?",
       "Are memories of the past making you feel regretful or sad?",
-      "Do you have someone you can talk to about your true feelings?"
+      "Are you worried about how your family will manage or what will happen to them after you are gone?"
     ]
   },
   "female": {
@@ -179,7 +179,7 @@ const GUIDED_QUESTIONS = {
       "Are health concerns making it difficult for you to stay positive?",
       "Do you feel that your wisdom and presence are valued by others?",
       "Are you afraid of the future or of losing your independence?",
-      "Do you find comfort in your daily routine, or does it feel empty?"
+      "Do you worry about the future of your children or family and how they will cope without you?"
     ]
   }
 };
@@ -247,6 +247,7 @@ function renderQuestions() {
       <div class="mcq-options">
         <button class="mcq-btn" onclick="selectMCQ(${idx}, 'Yes', this)">Yes</button>
         <button class="mcq-btn" onclick="selectMCQ(${idx}, 'No', this)">No</button>
+        <button class="mcq-btn" onclick="selectMCQ(${idx}, 'Maybe / Not Sure', this)">Maybe / Not Sure</button>
       </div>
     </div>
   `).join('');
@@ -327,6 +328,8 @@ async function analyze() {
   Object.entries(state.responses).forEach(([idx, ans]) => {
     if (ans === "Yes") {
       finalText += questions[idx] + " Yes. ";
+    } else if (ans === "Maybe / Not Sure") {
+      finalText += questions[idx] + " (I'm not sure/Maybe). ";
     }
   });
 
@@ -449,11 +452,21 @@ function runLocalInference(text) {
 
   // Find winner
   const winner = Object.entries(uiProbs).reduce((a, b) => b[1] > a[1] ? b : a)[0] || "Calm";
+  
+  // Keyword-based refinement (Frequency & Intensity)
+  let confidence = "Medium";
+  const lowerText = text.toLowerCase();
+  if (lowerText.includes("all the time") || lowerText.includes("daily") || lowerText.includes("every day")) {
+    confidence = "High";
+  } else if (lowerText.includes("sometimes") || lowerText.includes("rarely") || lowerText.includes("usually")) {
+    confidence = "Medium";
+  }
+
   const staticData = STATIC_SUGGESTIONS[winner] || STATIC_SUGGESTIONS["Calm"];
 
   return {
     condition: winner,
-    confidence: "Medium",
+    confidence: confidence,
     posteriorProbs: uiProbs,
     summary: staticData.summary,
     tips: staticData.tips,

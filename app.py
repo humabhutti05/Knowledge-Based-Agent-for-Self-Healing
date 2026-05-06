@@ -125,6 +125,8 @@ def analyze():
     prompt = f"""
 Analyze the feelings of a {g_label} ({a_label}) who said: "{text}"
 
+Pay special attention to frequency keywords like "sometimes", "usually", "daily", "all the time", or numerical values (e.g. 50-60%) if provided. Use these to adjust the intensities of the categories and your confidence level.
+
 Identify the intensities for these categories: Worry, Feeling Low, Overwhelmed, Mood Swings, Relationship Challenges, Calm.
 The total sum of probabilities MUST be 100.
 
