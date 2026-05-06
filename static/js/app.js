@@ -187,48 +187,44 @@ const GUIDED_QUESTIONS = {
 // ── Initialization ──
 async function fetchStats() {
   try {
+    console.log("Fetching system stats from /api/stats...");
     const res = await fetch('/api/stats');
+    if (!res.ok) throw new Error("Stats API error: " + res.status);
     const data = await res.json();
+    console.log("Stats received successfully:", data);
     
     // Update live ticker in header
-    document.getElementById("liveTotal").textContent = data.total || 0;
-    document.getElementById("liveToday").textContent = data.today || 0;
+    if (document.getElementById("liveTotal")) document.getElementById("liveTotal").textContent = data.total || 0;
+    if (document.getElementById("liveToday")) document.getElementById("liveToday").textContent = data.today || 0;
 
     // Update dashboard items if visible
-    if (document.getElementById("totalStats")) {
-      document.getElementById("totalStats").textContent = data.total || 0;
-    }
-    if (document.getElementById("todayStats")) {
-      document.getElementById("todayStats").textContent = data.today || 0;
-    }
+    if (document.getElementById("totalStats")) document.getElementById("totalStats").textContent = data.total || 0;
+    if (document.getElementById("todayStats")) document.getElementById("todayStats").textContent = data.today || 0;
     
-    if (document.getElementById("breakdownChart")) {
-      renderChart(data.breakdown);
-    }
-    if (document.getElementById("mainTrendChart")) {
-      renderTrendChart(data.history, "mainTrendChart");
-    }
-    if (document.getElementById("mainBarChart")) {
-      renderBarChart(data.breakdown, "mainBarChart");
-    }
+    console.log("Rendering graphs...");
+    if (document.getElementById("breakdownChart")) renderChart(data.breakdown);
+    if (document.getElementById("mainTrendChart")) renderTrendChart(data.history, "mainTrendChart");
+    if (document.getElementById("mainBarChart")) renderBarChart(data.breakdown, "mainBarChart");
+    
     if (document.getElementById("recentLogBody")) {
       populateRecentTable(data.recent);
     }
   } catch (err) {
-    console.error("Failed to fetch stats:", err);
+    console.error("CRITICAL: Failed to fetch stats:", err);
   }
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
   try {
-    const res = await fetch("data/model.json");
+    const res = await fetch("/static/data/model.json");
+    if (!res.ok) throw new Error("Model file not found at /static/data/model.json");
     state.model = await res.json();
     console.log("Neural model loaded successfully");
   } catch (err) {
     console.error("Failed to load model:", err);
   }
   
-  // Call stats fetch
+  // Call stats fetch immediately
   fetchStats();
 });
 
